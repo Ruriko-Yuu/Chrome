@@ -47,7 +47,7 @@ class SearchSpace extends React.Component<any> {
             if (res.status === 200) {
               const data = res.data;
               let a = data
-                .slice(1, data.length - 2)
+                .slice(1, data.length - 1)
                 .replace(/\{q:/, `{"q":`)
                 .replace(/,s:/, `,"s":`)
                 .replace(/,p:/, `,"p":`)

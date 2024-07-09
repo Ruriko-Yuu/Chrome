@@ -49,7 +49,7 @@ const defaultCollectionList = [
   },
   {
     type: 'link',
-    icon: 'https://antv.vision/favicon-32x32.png?v=9772447a8d07a8fe19894b5176c6cb0d',
+    icon: 'https://mdn.alipayobjects.com/huamei_qa8qxu/afts/img/A*7svFR6wkPMoAAAAAAAAAAAAADmJ7AQ/original',
     href: 'https://antv.vision/zh/',
     title: 'antV',
     value: 'link-antV',

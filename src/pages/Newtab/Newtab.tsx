@@ -16,7 +16,7 @@ const Newtab = () => {
         if (doc[docHidden]) {
           document.title = '(╯‵□′)╯︵┻━┻';
         } else {
-          document.title = '钱难挣屎难吃，在珍岛上班不如回家打螺丝';
+          document.title = '';
           localStorage.getItem('speechInteraction') &&
             workflow.constructor.speechInteraction('meetAgain');
           setTimeout(() => {
