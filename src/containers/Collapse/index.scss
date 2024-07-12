@@ -1,0 +1,16 @@
+.flex-c-sb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.collapse-content {
+  overflow: hidden;
+  transition: all 0.46s;
+  height: 0;
+  &.open {
+    height: auto;
+  }
+  &.close {
+    height: 0;
+  }
+}

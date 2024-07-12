@@ -1,10 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Switch } from '../../containers/Switch';
+import { Collapse } from '../../containers/Collapse';
 import './Popup.scss';
 
 const Popup = () => {
+  /** 开发者 */ const [isDeveloper, setIsDeveloper] = useState(false);
   /** 是否显示布局 */ const [showLayout, setShowLayout] = useState(false);
+  /** 是否显示XML输出 */ const [showXmlConsole, setShowXmlConsole] =
+    useState(false);
   /** 当前页域名 */ const [domain, setDomain] = useState(undefined);
+
   /** 获取当前选项卡ID */ const getCurrentTabId = (callback: any) => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (callback) callback(tabs.length ? tabs[0].id : null);
@@ -28,23 +33,28 @@ const Popup = () => {
       });
     });
   };
+  /** 切换是否是开发者 */ const changeIsDeveloper = (checked: boolean) => {
+    console.log(checked);
+    setIsDeveloper(checked);
+    chrome.storage.sync.set({ isDeveloper: checked }, () => {});
+  };
   /** 切换显示布局 */ const changeShowLayout = (e: any) => {
     let obj: any = {};
-    chrome.storage.sync.get({ dev_mode: {} }, (v) => {
-      domain && (v.dev_mode[domain] = showLayout ? 0 : 1);
-      chrome.storage.sync.set({ dev_mode: v.dev_mode }, () => {
-        if (localStorage.getItem('dev_mode') !== null) {
-          obj = JSON.parse(localStorage.getItem('dev_mode') || '{}');
+    chrome.storage.sync.get({ show_layout: {} }, (v) => {
+      domain && (v.show_layout[domain] = showLayout ? 0 : 1);
+      chrome.storage.sync.set({ show_layout: v.show_layout }, () => {
+        if (localStorage.getItem('show_layout') !== null) {
+          obj = JSON.parse(localStorage.getItem('show_layout') || '{}');
         }
         if (domain !== null) {
           domain && (obj[domain] = showLayout ? 0 : 1);
         }
-        localStorage.setItem('dev_mode', JSON.stringify(obj));
+        localStorage.setItem('show_layout', JSON.stringify(obj));
         setShowLayout(!showLayout);
         sendMessageToContentScript(
           {
             type: 'shell',
-            value: showLayout ? 'devModeOff' : 'devModeOn',
+            value: showLayout ? 'hiddenLayout' : 'showLayout',
           },
           (response: any) => {
             console.debug('over');
@@ -53,26 +63,81 @@ const Popup = () => {
       });
     });
   };
-
+  /** 切换显示布局 */ const changeShowXmlConsole = (e: any) => {
+    let obj: any = {};
+    chrome.storage.sync.get({ show_xmlConsole: {} }, (v) => {
+      domain && (v.show_xmlConsole[domain] = showXmlConsole ? 0 : 1);
+      chrome.storage.sync.set({ show_xmlConsole: v.show_xmlConsole }, () => {
+        if (localStorage.getItem('show_xmlConsole') !== null) {
+          obj = JSON.parse(localStorage.getItem('show_xmlConsole') || '{}');
+        }
+        if (domain !== null) {
+          domain && (obj[domain] = showXmlConsole ? 0 : 1);
+        }
+        localStorage.setItem('show_xmlConsole', JSON.stringify(obj));
+        setShowXmlConsole(!showXmlConsole);
+        sendMessageToContentScript(
+          {
+            type: 'shell',
+            value: showXmlConsole ? 'hiddenXmlConsole' : 'showXmlConsole',
+          },
+          (response: any) => {
+            console.debug('over');
+          }
+        );
+      });
+    });
+  };
+  useEffect(() => {
+    console.log('初始化');
+    chrome.storage.sync.get({ isDeveloper: false }, (v) => {
+      setIsDeveloper(v.isDeveloper);
+    });
+  }, []);
   useEffect(() => {
     getCurrentTabUrl();
   }, [getCurrentTabUrl]);
 
   useEffect(() => {
-    domain &&
-      chrome.storage.sync.get({ dev_mode: {} }, (v) => {
-        setShowLayout(v.dev_mode[domain] === 1);
+    if (domain) {
+      chrome.storage.sync.get({ show_layout: {} }, (v) => {
+        setShowLayout(v.show_layout[domain] === 1);
       });
+      chrome.storage.sync.get({ show_xmlConsole: {} }, (v) => {
+        setShowXmlConsole(v.show_xmlConsole[domain] === 1);
+      });
+    }
   }, [domain]);
   return (
     <div className="App">
       <header></header>
-      <body>
-        <div className="flex-lc">
-          <span>显示布局</span>
-          <Switch checked={showLayout} onClick={changeShowLayout} />
-        </div>
-      </body>
+      <div className="app-body">
+        <Collapse
+          title={
+            <div className="flex-lc">
+              <span>开发者模式</span>
+              <Switch checked={isDeveloper} onChange={changeIsDeveloper} />
+            </div>
+          }
+          content={
+            isDeveloper && (
+              <div className="developer-area">
+                <div className="flex-lc">
+                  <span>显示布局</span>
+                  <Switch checked={showLayout} onClick={changeShowLayout} />
+                </div>
+                <div className="flex-lc">
+                  <span>XML请求输出</span>
+                  <Switch
+                    checked={showXmlConsole}
+                    onClick={changeShowXmlConsole}
+                  />
+                </div>
+              </div>
+            )
+          }
+        />
+      </div>
     </div>
   );
 };

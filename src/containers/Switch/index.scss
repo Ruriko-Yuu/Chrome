@@ -6,7 +6,7 @@
   background-color: rgb(255, 73, 73);
   border-radius: 10px;
   transition: all .3s;
-
+  cursor: pointer;
   p {
     padding: 0 5px;
     margin: 0;
@@ -52,4 +52,10 @@
 
 .containers-switch.on::before {
   left: 22px;
+}
+.disabled {
+  cursor: no-drop !important;
+}
+.readonly {
+  cursor: none !important;
 }

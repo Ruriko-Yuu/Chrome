@@ -9,13 +9,13 @@ export const videoAuto = () => {
   if (document.getElementsByTagName('video').length === 0) {
     setTimeout(() => {
       videoAuto();
-    }, 5e1);
+    }, 5e2);
     return;
   }
   if (
-    window.innerWidth / window.innerHeight >
+    window.innerWidth / window.innerHeight >=
     parseFloat(getStyle(document.getElementsByTagName('video')[0], 'width')) /
-      parseFloat(getStyle(document.getElementsByTagName('video')[0], 'height'))
+    parseFloat(getStyle(document.getElementsByTagName('video')[0], 'height'))
   ) {
     document.getElementsByTagName('video')[0].style.width = '100%';
     document.getElementsByTagName('video')[0].style.height = 'auto';

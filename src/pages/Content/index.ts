@@ -27,7 +27,7 @@ document.addEventListener(
   false
 );
 // TODO: 🚀
-function devModeOn() {
+function showLayout() {
   const CSS = `
     * {
       outline: 1px solid #6cf !important;
@@ -56,27 +56,50 @@ function devModeOn() {
   new_element.innerHTML = `${CSS}`;
   console.debug(new_element);
   document.body.appendChild(new_element);
-  var s = document.createElement('script');
-  s.src = chrome.runtime.getURL('injectedScript.bundle.js');
-  document.head
-    ? document.head.appendChild(s)
-    : document.documentElement.appendChild(s);
 }
-function devModeOff() {
+function hiddenLayout() {
   let HTMLElement = document.getElementById('ruriko-mark-dev');
   if (HTMLElement !== null) {
     document.body.removeChild(HTMLElement);
   }
 }
+
+function hiddenXmlConsole() {
+  document.getElementById('xmlConsole')!.className = 'off'
+}
+function showXmlConsole() {
+  if (document.getElementById('xmlConsole') === null) {
+    let new_element = document.createElement('style');
+    new_element.setAttribute('type', 'text/css');
+    new_element.setAttribute('id', 'xmlConsole');
+    new_element.setAttribute('class', 'on');
+    new_element.innerHTML = ``;
+    document.body.appendChild(new_element);
+    var s = document.createElement('script');
+    s.src = chrome.runtime.getURL('injectedScript.bundle.js');
+    document.head
+      ? document.head.appendChild(s)
+      : document.documentElement.appendChild(s);
+  } else {
+    console.log(document.getElementById('xmlConsole')!.className = 'on');
+  }
+}
+
 // 接收来自后台的消息
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type === 'shell') {
     switch (request.value) {
-      case 'devModeOn':
-        devModeOn();
+      case 'showLayout':
+        showLayout();
         break;
-      case 'devModeOff':
-        devModeOff();
+      case 'hiddenLayout':
+        hiddenLayout();
+        break;
+      case 'hiddenXmlConsole':
+        hiddenXmlConsole();
+        break;
+      case 'showXmlConsole':
+        showXmlConsole();
         break;
       case 'monitor':
         let obj: any = {};
@@ -106,19 +129,25 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   setInterval(() => {
     console.log('ypa!!!');
   }, 2e4);
-  chrome.storage.sync.get({ dev_mode: {} }, (v) => {
-    console.log('扩展插件【Ruriko的工具箱】:storage', v);
+  chrome.storage.sync.get({ show_layout: {} }, (v) => {
+    console.log('扩展插件【Ruriko的工具箱】:storage show_layout', v);
     var s = document.createElement('script');
     s.src = chrome.runtime.getURL('injectedEchoScript.bundle.js');
     document.head
       ? document.head.appendChild(s)
       : document.documentElement.appendChild(s);
-    if (v.dev_mode[url] === 1) {
-      devModeOn();
+    if (v.show_layout[url] === 1) {
+      showLayout();
+    }
+  });
+  chrome.storage.sync.get({ show_xmlConsole: {} }, (v) => {
+    console.log('扩展插件【Ruriko的工具箱】:storage show_xmlConsole', v);
+    if (v.show_xmlConsole[url] === 1) {
+      showXmlConsole();
     }
   });
   console.log('扩展插件【Ruriko的工具箱】:chrome', chrome);
-  const storageDevMode = localStorage.getItem('dev_mode');
+  const storageDevMode = localStorage.getItem('show_layout');
   if (storageDevMode !== null) {
     obj = JSON.parse(storageDevMode);
   }
@@ -133,7 +162,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
   chrome.storage.sync.get({ statistics: {} }, (v) => {
     console.log('扩展插件【Ruriko的工具箱】:storage', v);
-    // chrome.storage.sync.set({ dev_mode: v.dev_mode }, () => {
+    // chrome.storage.sync.set({ show_layout: v.show_layout }, () => {
     //   console.log('赋值成功');
     // });
   });

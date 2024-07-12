@@ -13,8 +13,10 @@
     display: flex;
     align-items: center;
   }
-
-  body {
+  .cp {
+    cursor: pointer;
+  }
+  .app-body {
     font-size: 12px;
     color: #eee;
   }
