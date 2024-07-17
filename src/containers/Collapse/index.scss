@@ -3,14 +3,7 @@
   align-items: center;
   justify-content: space-between;
 }
-.collapse-content {
+.collapse-content-box {
   overflow: hidden;
-  transition: all 0.46s;
-  height: 0;
-  &.open {
-    height: auto;
-  }
-  &.close {
-    height: 0;
-  }
+  transition: height 0.23s;
 }

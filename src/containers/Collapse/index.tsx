@@ -21,7 +21,7 @@ export const Collapse: FC<{
         <div
           onClick={() => {
             setCollapseContentHeight(
-              collapseStatus ? collapseContentRef.current.clientHeight : 0
+              collapseStatus ? 0 : collapseContentRef.current.clientHeight
             );
             setCollapseStatus(!collapseStatus);
           }}
@@ -30,17 +30,22 @@ export const Collapse: FC<{
         </div>
       </div>
       <div
-        ref={collapseContentRef}
-        className={['collapse-content', collapseStatus ? 'open' : 'close'].join(
-          ' '
-        )}
+        className="collapse-content-box"
         style={{
           ...(collapseContentHeight !== void 0
             ? { height: `${collapseContentHeight}px` }
             : {}),
         }}
       >
-        {content}
+        <div
+          ref={collapseContentRef}
+          className={[
+            'collapse-content',
+            collapseStatus ? 'open' : 'close',
+          ].join(' ')}
+        >
+          {content}
+        </div>
       </div>
     </div>
   );
