@@ -4,7 +4,10 @@ import { Collapse } from '../../containers/Collapse';
 import './Popup.scss';
 
 const Popup = () => {
-  /** 开发者 */ const [isDeveloper, setIsDeveloper] = useState(false);
+  /** 开发者 */
+  let isDeveloper;
+  let setIsDeveloper;
+  [isDeveloper, setIsDeveloper] = useState(false);
   /** 是否显示布局 */ const [showLayout, setShowLayout] = useState(false);
   /** 是否显示XML输出 */ const [showXmlConsole, setShowXmlConsole] =
     useState(false);
@@ -34,9 +37,50 @@ const Popup = () => {
     });
   };
   /** 切换是否是开发者 */ const changeIsDeveloper = (checked: boolean) => {
-    console.log(checked);
     setIsDeveloper(checked);
     chrome.storage.sync.set({ isDeveloper: checked }, () => {});
+    let obj: any = {};
+    chrome.storage.sync.get({ show_layout: {}, show_xmlConsole: {} }, (v) => {
+      if (domain) {
+        setShowLayout(checked);
+        if (localStorage.getItem('show_layout') !== null) {
+          obj = JSON.parse(localStorage.getItem('show_layout') || '{}');
+        }
+        localStorage.setItem('show_layout', JSON.stringify(obj));
+        if (v.show_layout[domain] === checked ? 1 : 0) {
+        } else {
+          sendMessageToContentScript(
+            {
+              type: 'shell',
+              value: checked ? 'showLayout' : 'hiddenLayout',
+            },
+            (response: any) => {
+              console.debug('over');
+            }
+          );
+        }
+        if (!checked) {
+          setShowXmlConsole(false);
+          obj = {};
+          if (localStorage.getItem('show_xmlConsole') !== null) {
+            obj = JSON.parse(localStorage.getItem('show_xmlConsole') || '{}');
+          }
+          localStorage.setItem('show_xmlConsole', JSON.stringify(obj));
+          if (v.show_xmlConsole[domain] === checked ? 1 : 0) {
+          } else {
+            sendMessageToContentScript(
+              {
+                type: 'shell',
+                value: 'hiddenXmlConsole',
+              },
+              (response: any) => {
+                console.debug('over');
+              }
+            );
+          }
+        }
+      }
+    });
   };
   /** 切换显示布局 */ const changeShowLayout = (e: any) => {
     let obj: any = {};

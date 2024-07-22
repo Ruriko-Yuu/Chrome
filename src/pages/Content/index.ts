@@ -1,6 +1,7 @@
 let doc: any = document;
 let hidden = '';
 let visibilityChange = '';
+let titleSave = doc.title
 if (typeof doc.hidden !== 'undefined') {
   hidden = 'hidden';
   visibilityChange = 'visibilitychange';
@@ -15,13 +16,19 @@ if (typeof doc.hidden !== 'undefined') {
   visibilityChange = 'webkitvisibilitychange';
 }
 
+
 document.addEventListener(
   visibilityChange,
   () => {
     if (doc[hidden]) {
-      document.title = '(╯‵□′)╯︵┻━┻';
+      document.title = `(╯‵□′)╯︵┻━┻ ${titleSave}`;
     } else {
       document.title = '欢迎回来';
+      setTimeout(() => {
+        if (!doc[hidden]) {
+          document.title = titleSave;
+        }
+      }, 3e3)
     }
   },
   false
@@ -151,6 +158,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (storageDevMode !== null) {
     obj = JSON.parse(storageDevMode);
   }
+  const myBtn = () => {
+    const container = document.getElementsByClassName('feed-roll-btn')
+    console.log('container', container);
+    if (container.length > 0) {
+      // container[0].innerHTML = ''
+      var e = document.createElement("button");
+      e.innerHTML = '换一换';
+      e.onclick = () => {
+        console.log('mybtn clicked')
+      }
+      container[0].appendChild(e)
+    } else {
+      setTimeout(() => {
+        myBtn()
+      }, 1e3);
+    }
+  }
   if (
     'https://www.bilibili.com/'.indexOf(window.location.href.split('?')[0]) !==
     -1
@@ -159,6 +183,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       `%c换一换回退模块加载`,
       'color:white;background: #4386FE;padding: 3px 10px;border-radius: 3px'
     );
+    myBtn()
   }
   chrome.storage.sync.get({ statistics: {} }, (v) => {
     console.log('扩展插件【Ruriko的工具箱】:storage', v);

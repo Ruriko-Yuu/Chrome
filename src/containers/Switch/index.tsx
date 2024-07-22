@@ -19,7 +19,9 @@ export const Switch: FC<{
     setSwitchChecked(!switchChecked);
     onChange && onChange(!switchChecked || false, null);
   };
-
+  useEffect(() => {
+    setSwitchChecked(checked)
+  },[checked])
   return (
     <div
       className={[
