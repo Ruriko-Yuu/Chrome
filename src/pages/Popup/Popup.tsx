@@ -5,9 +5,7 @@ import './Popup.scss';
 
 const Popup = () => {
   /** 开发者 */
-  let isDeveloper;
-  let setIsDeveloper;
-  [isDeveloper, setIsDeveloper] = useState(false);
+  const [isDeveloper, setIsDeveloper] = useState(false);
   /** 是否显示布局 */ const [showLayout, setShowLayout] = useState(false);
   /** 是否显示XML输出 */ const [showXmlConsole, setShowXmlConsole] =
     useState(false);
@@ -59,6 +57,8 @@ const Popup = () => {
             }
           );
         }
+        domain && (v.show_layout[domain] = checked ? 1 : 0);
+        chrome.storage.sync.set({ show_layout: v.show_layout }, () => {});
         if (!checked) {
           setShowXmlConsole(false);
           obj = {};
@@ -78,6 +78,11 @@ const Popup = () => {
               }
             );
           }
+          domain && (v.show_xmlConsole[domain] = 0);
+          chrome.storage.sync.set(
+            { show_xmlConsole: v.show_xmlConsole },
+            () => {}
+          );
         }
       }
     });
@@ -137,6 +142,7 @@ const Popup = () => {
     chrome.storage.sync.get({ isDeveloper: false }, (v) => {
       setIsDeveloper(v.isDeveloper);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     getCurrentTabUrl();

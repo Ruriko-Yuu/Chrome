@@ -167,6 +167,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       e.innerHTML = '换一换';
       e.onclick = () => {
         console.log('mybtn clicked')
+        fetch('https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd', {}).then((res) => {
+          console.log(res.json().then(data => console.log(data.data.item)))
+        }).catch(err => console.log(err))
       }
       container[0].appendChild(e)
     } else {
