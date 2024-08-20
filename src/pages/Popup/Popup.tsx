@@ -68,15 +68,17 @@ const Popup = () => {
           localStorage.setItem('show_xmlConsole', JSON.stringify(obj));
           if (v.show_xmlConsole[domain] === checked ? 1 : 0) {
           } else {
-            sendMessageToContentScript(
-              {
-                type: 'shell',
-                value: 'hiddenXmlConsole',
-              },
-              (response: any) => {
-                console.debug('over');
-              }
-            );
+            if (v.show_xmlConsole[domain]) {
+              sendMessageToContentScript(
+                {
+                  type: 'shell',
+                  value: 'hiddenXmlConsole',
+                },
+                (response: any) => {
+                  console.debug('over');
+                }
+              );
+            }
           }
           domain && (v.show_xmlConsole[domain] = 0);
           chrome.storage.sync.set(

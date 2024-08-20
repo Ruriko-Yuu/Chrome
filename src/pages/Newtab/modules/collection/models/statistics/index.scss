@@ -25,7 +25,7 @@
       top: 8px;
       right: 8px;
       line-height: 10px;
-      color: #fff;
+      color: #000;
       cursor: pointer;
     }
   }
@@ -33,5 +33,21 @@
   .content.over {
     width: 100%;
     height: 100%;
+  }
+}
+
+.echarts-space {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 50% 1fr;
+  .data-space {
+
+  }
+  .chart-preview-space {
+
+  }
+  .conf-space {
+
   }
 }
