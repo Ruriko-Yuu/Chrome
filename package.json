@@ -9,15 +9,19 @@
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'"
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/theme-one-dark": "^6.1.2",
     "@esotericsoftware/spine-core": "^4.2.7",
     "@esotericsoftware/spine-webgl": "^4.2.9",
     "@hot-loader/react-dom": "^17.0.2",
     "@types/sortablejs": "^1.13.0",
+    "@uiw/react-codemirror": "^4.23.0",
     "axios": "^0.27.2",
     "echarts": "^5.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hot-loader": "^4.13.0",
+    "rimraf": "^6.0.1",
     "sortablejs": "^1.15.0",
     "styled-components": "^6.0.0-rc.1"
   },
