@@ -70,7 +70,6 @@ var options = {
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'build'),
-    clean: true,
     publicPath: ASSET_PATH,
   },
   module: {

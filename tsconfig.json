@@ -16,6 +16,6 @@
     "jsx": "react",
     "noImplicitThis": false,
   },
-  "include": ["src"],
+  "include": ["src", "public/js/live2d"],
   "exclude": ["build", "node_modules"]
 }
