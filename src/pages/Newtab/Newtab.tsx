@@ -71,7 +71,7 @@ const Newtab = () => {
 
   	// 设置缩放比例
   	// model.scale.set(0.118);
-  	model.scale.set(0.218);
+  	model.scale.set(0.458);
   	// 创建模型对象
   	const app = new PIXI.Application({
   		// 配置模型舞台
