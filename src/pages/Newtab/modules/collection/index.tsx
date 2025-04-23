@@ -85,6 +85,7 @@ class CollectionSpace extends React.Component<any> {
             .filter((ele) => ele)
             .map((ele, idx) =>
               ele.type === 'function' ? (
+                // style={{ gridColumn: 'span 3', gridRow: 'span 3' }}
                 <li
                   key={idx}
                   onClick={() => {

@@ -24,7 +24,9 @@ $space-width: 555px;
       position: absolute;
       top: 50%;
       left: 12px;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       width: 22px;
       height: 22px;
       transform: translateY(-50%);
@@ -41,7 +43,7 @@ $space-width: 555px;
       right: 5px;
       display: inline-block;
       color: #ccc;
-      zoom: .8;
+      zoom: 0.8;
       transform: translateY(-50%);
     }
   }
@@ -55,7 +57,7 @@ $space-width: 555px;
     width: 100%;
     padding-right: 40px;
     height: $common-height;
-    background-color: rgba(255, 255, 255, .8);
+    background-color: rgba(255, 255, 255, 0.8);
     border: none;
     text-indent: 1em;
     border-radius: 0 20px 20px 0;
@@ -101,6 +103,31 @@ $space-width: 555px;
     li:hover,
     li.is-active {
       background-color: rgba(222, 222, 222, 1);
+    }
+  }
+}
+.engine-list {
+  position: absolute;
+  top: calc($common-height + 10px);
+  left: 0;
+  box-shadow: 0 0 1px 1px #eee;
+  border-radius: 4px;
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+    background-color: #fff;
+    cursor: pointer;
+    &:hover {
+      background-color: rgba(242, 242, 242, 1);
+    }
+    i {
+    display: block;}
+    img {
+      width: 18px;
+      height: 18px;
+      margin-right: 5px;
     }
   }
 }
