@@ -80,7 +80,15 @@ class CollectionSpace extends React.Component<any> {
   render() {
     return (
       <>
-        <ul className="collection-space">
+        <ul
+          className="collection-space"
+          style={{
+            height:
+              ~~(this.state.collectionList.filter((ele) => ele).length / 8) *
+                80 +
+              'px',
+          }}
+        >
           {this.state.collectionList
             .filter((ele) => ele)
             .map((ele, idx) =>
@@ -119,6 +127,7 @@ class CollectionSpace extends React.Component<any> {
               )
             )}
         </ul>
+        <ul className="collection-space" id="sort"></ul>
         {this.state.collectionActive === 'StatisticsSpace' ? (
           <StatisticsSpace
             removeCollectionActive={this.removeCollectionActive}
@@ -133,6 +142,7 @@ class CollectionSpace extends React.Component<any> {
     );
   }
   componentDidMount() {
+    bookmarkList();
     chrome.storage.sync.get('collectionList', (v) => {
       this.setState({
         collectionList: v['collectionList']

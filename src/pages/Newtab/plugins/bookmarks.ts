@@ -57,19 +57,56 @@ const bookmarkList = () => {
     analyseBookMark(bookmarkArray, a, '');
     let innerHTML = '';
     a.forEach((ele) => {
-      let str = ele.url.split('?')[0].split('/');
-      innerHTML += `
-        <li>
-          <a href="${ele.url}" target="_blank">
-            <!--<img style="display: block;width: 30px;height: 30px;margin: 0 auto" src="${
-              'chrome://favicon/' + ele.url
-            }" />-->
-            <p style="text-align: center;">${ele.title.slice(0, 4)}</p>
-          </a>
-        </li>
-      `;
+      async function getFavicon(url: any) {
+        try {
+          const response = await fetch(url);
+          const html = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+
+          // 查找所有可能的 favicon 链接
+          const favicon: any =
+            doc.querySelector('link[rel="icon"]') ||
+            doc.querySelector('link[rel="shortcut icon"]') ||
+            doc.querySelector('link[rel="apple-touch-icon"]');
+
+          if (favicon) {
+            if (favicon.href.indexOf('http') === 0 || favicon.href.indexOf('data:image') === 0) {
+              const faviconUrl = new URL(favicon.href, url).href;
+              return faviconUrl;
+            } else {
+              const urlObj = new URL(ele.url);
+              const baseUrl = `${urlObj.protocol}//${urlObj.hostname}`; // 提取协议 + 域名
+              if (favicon.href.split('/').length > 4) {
+                return 'https://' + favicon.href.split('//')[favicon.href.split('//').length - 1]
+              }
+              return baseUrl + '/' + favicon.href.split('/')[favicon.href.split('/').length - 1]
+            }
+          } else {
+            return `${new URL(url).origin}/favicon.ico`;
+          }
+        } catch (error) {
+          return null;
+        }
+      }
+      let imageUrl = ''
+      // 使用示例
+      getFavicon(ele.url).then(faviconUrl => {
+        if (faviconUrl) {
+          // 显示图标（例如设置到 <img> 标签）
+          imageUrl = faviconUrl;
+          innerHTML += `
+            <li>
+              <a href="${ele.url}" target="_blank">
+                <img style="display: block;width: 30px;height: 30px;margin: 0 auto" src="${imageUrl}" />
+                <p style="text-align: center;">${ele.title.slice(0, 4)}</p>
+              </a>
+            </li>
+          `;
+          document.getElementsByClassName('collection-space')[1].innerHTML = innerHTML;
+        }
+      });
     });
-    document.getElementsByTagName('ul')[0].innerHTML = innerHTML;
   });
   // //
   var el = document.getElementById('sort');
