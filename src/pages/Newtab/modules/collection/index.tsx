@@ -6,6 +6,13 @@ import './index.scss';
 
 const defaultCollectionList = [
   {
+    type: 'block',
+    icon: '',
+    title: '',
+    value: 'date',
+    href: '',
+  },
+  {
     type: 'function',
     icon: '../../../../../public/media/image/icon/z23_2.png',
     title: 'Azurlane',
@@ -73,6 +80,14 @@ class CollectionSpace extends React.Component<any> {
   state = {
     collectionList: defaultCollectionList,
     collectionActive: '',
+    dateObj: {
+      week: '',
+      month: '',
+      day: '',
+      hour: '',
+      minute: '',
+      second: '',
+    },
   };
   removeCollectionActive = () => {
     this.setState({ collectionActive: '' });
@@ -84,7 +99,9 @@ class CollectionSpace extends React.Component<any> {
           className="collection-space"
           style={{
             height:
-              ~~(this.state.collectionList.filter((ele) => ele).length / 8) *
+              Math.ceil(
+                (this.state.collectionList.filter((ele) => ele).length + 3) / 8
+              ) *
                 80 +
               'px',
           }}
@@ -110,6 +127,17 @@ class CollectionSpace extends React.Component<any> {
                     alt=""
                   />
                   <p>{ele.title || '🖐🏻🐟ing...'}</p>
+                </li>
+              ) : ele.type === 'block' && ele.value === 'date' ? (
+                <li
+                  key={idx}
+                  className="x-flex"
+                  style={{ gridColumn: 'span 2', gridRow: 'span 2' }}
+                >
+                  周{this.state.dateObj.week}
+                  <br />
+                  {this.state.dateObj.month}月{this.state.dateObj.day}日<br />
+                  {this.state.dateObj.hour}时{this.state.dateObj.minute}分{this.state.dateObj.second}秒
                 </li>
               ) : (
                 <li key={idx}>
@@ -144,11 +172,17 @@ class CollectionSpace extends React.Component<any> {
   componentDidMount() {
     bookmarkList();
     chrome.storage.sync.get('collectionList', (v) => {
-      this.setState({
-        collectionList: v['collectionList']
-          ? v['collectionList']
-          : defaultCollectionList,
-      });
+      console.log(v['collectionList'], defaultCollectionList);
+      if (
+        v['collectionList'].filter((ele: any) => ele).length ===
+        defaultCollectionList.length
+      ) {
+        this.setState({
+          collectionList: v['collectionList']
+            ? v['collectionList']
+            : defaultCollectionList,
+        });
+      }
     });
     var el = document.getElementsByClassName(
       'collection-space'
@@ -169,6 +203,23 @@ class CollectionSpace extends React.Component<any> {
     if (el !== null) {
       sortable = Sortable.create(el, ops);
     }
+    const animate = () => {
+      // 动画逻辑
+      const time = new Date();
+      this.setState({
+        dateObj: {
+          week: time.getDay(),
+          month: time.getMonth() + 1,
+          day: time.getDate(),
+          hour: time.getHours(),
+          minute: time.getMinutes(),
+          second: time.getSeconds()
+        },
+      });
+      requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
   }
+  componentWillUnmount() {}
 }
 export default CollectionSpace;

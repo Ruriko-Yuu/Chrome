@@ -58,6 +58,9 @@ const bookmarkList = () => {
     let innerHTML = '';
     a.forEach((ele) => {
       async function getFavicon(url: any) {
+        if (localStorage.getItem(url)) {
+          return localStorage.getItem(url);
+        }
         try {
           const response = await fetch(url);
           const html = await response.text();
@@ -78,11 +81,14 @@ const bookmarkList = () => {
               const urlObj = new URL(ele.url);
               const baseUrl = `${urlObj.protocol}//${urlObj.hostname}`; // 提取协议 + 域名
               if (favicon.href.split('/').length > 4) {
+                localStorage.setItem(url, 'https://' + favicon.href.split('//')[favicon.href.split('//').length - 1]);
                 return 'https://' + favicon.href.split('//')[favicon.href.split('//').length - 1]
               }
+              localStorage.setItem(url, baseUrl + '/' + favicon.href.split('/')[favicon.href.split('/').length - 1]);
               return baseUrl + '/' + favicon.href.split('/')[favicon.href.split('/').length - 1]
             }
           } else {
+            localStorage.setItem(url, `${new URL(url).origin}/favicon.ico`);
             return `${new URL(url).origin}/favicon.ico`;
           }
         } catch (error) {
