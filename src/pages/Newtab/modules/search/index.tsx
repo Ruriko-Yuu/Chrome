@@ -114,7 +114,7 @@ class SearchSpace extends React.Component<any> {
               window.location.href = `https://www.baidu.com/s?ie=utf-8&wd=${this.state.word}`;
             } else {
               window.location.href = `https://www.baidu.com/s?ie=utf-8&wd=${
-                this.state.searchList[this.state.searchActive]
+                this.state.searchList[this.state.searchActive].q
               }`;
             }
           } else {
