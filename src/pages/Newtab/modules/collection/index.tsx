@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import StatisticsSpace from './models/statistics/index';
 import Sortable from 'sortablejs';
 import bookmarkList from '../../plugins/bookmarks';
+import DateBlock from './models/date/index';
 import './index.scss';
 
 const defaultCollectionList = [
@@ -129,16 +130,7 @@ class CollectionSpace extends React.Component<any> {
                   <p>{ele.title || '🖐🏻🐟ing...'}</p>
                 </li>
               ) : ele.type === 'block' && ele.value === 'date' ? (
-                <li
-                  key={idx}
-                  className="x-flex"
-                  style={{ gridColumn: 'span 2', gridRow: 'span 2' }}
-                >
-                  周{this.state.dateObj.week}
-                  <br />
-                  {this.state.dateObj.month}月{this.state.dateObj.day}日<br />
-                  {this.state.dateObj.hour}时{this.state.dateObj.minute}分{this.state.dateObj.second}秒
-                </li>
+                <DateBlock key={idx} />
               ) : (
                 <li key={idx}>
                   <a href={ele.href}>
@@ -203,22 +195,6 @@ class CollectionSpace extends React.Component<any> {
     if (el !== null) {
       sortable = Sortable.create(el, ops);
     }
-    const animate = () => {
-      // 动画逻辑
-      const time = new Date();
-      this.setState({
-        dateObj: {
-          week: time.getDay(),
-          month: time.getMonth() + 1,
-          day: time.getDate(),
-          hour: time.getHours(),
-          minute: time.getMinutes(),
-          second: time.getSeconds()
-        },
-      });
-      requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
   }
   componentWillUnmount() {}
 }
