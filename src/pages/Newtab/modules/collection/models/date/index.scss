@@ -1,0 +1,17 @@
+#date-space {
+  flex-wrap: wrap;
+  > p {
+    width: 100%;
+  }
+}
+.week {
+  font-size: 18px !important;
+  font-weight: bold;
+}
+.month--day {
+  font-size: 24px !important;
+  font-weight: bold;
+}
+.hour--minute--second {
+  font-size: 14px !important;
+}

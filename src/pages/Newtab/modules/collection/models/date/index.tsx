@@ -5,9 +5,9 @@ const Newtab = () => {
     week: 0,
     month: 0,
     day: 0,
-    hour: 0,
-    minute: 0,
-    second: 0,
+    hour: '',
+    minute: '',
+    second: '',
   });
   useEffect(() => {
     const animate = () => {
@@ -17,9 +17,9 @@ const Newtab = () => {
         week: time.getDay(),
         month: time.getMonth() + 1,
         day: time.getDate(),
-        hour: time.getHours(),
-        minute: time.getMinutes(),
-        second: time.getSeconds(),
+        hour: time.getHours() < 10 ? `0${time.getHours()}` : `${time.getHours()}`,
+        minute: time.getMinutes() < 10 ? `0${time.getMinutes()}` : `${time.getMinutes()}`,
+        second: time.getSeconds() < 10 ? `0${time.getSeconds()}` : `${time.getSeconds()}`,
       });
       requestAnimationFrame(animate);
     };
@@ -27,11 +27,18 @@ const Newtab = () => {
   }, []);
 
   return (
-    <li className="x-flex" style={{ gridColumn: 'span 2', gridRow: 'span 2' }}>
-      周{dateObj.week}
-      <br />
-      {dateObj.month}月{dateObj.day}日<br />
-      {dateObj.hour}时{dateObj.minute}分{dateObj.second}秒
+    <li
+      id="date-space"
+      className="x-flex"
+      style={{ gridColumn: 'span 2', gridRow: 'span 2' }}
+    >
+      <p className="week">周{dateObj.week}</p>
+      <p className="month--day">
+        {dateObj.month}/{dateObj.day}
+      </p>
+      <p className="hour--minute--second">
+        {dateObj.hour}:{dateObj.minute}:{dateObj.second}
+      </p>
     </li>
   );
 };
