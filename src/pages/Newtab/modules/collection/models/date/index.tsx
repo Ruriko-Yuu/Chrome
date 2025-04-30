@@ -32,7 +32,7 @@ const Newtab = () => {
       className="x-flex"
       style={{ gridColumn: 'span 2', gridRow: 'span 2' }}
     >
-      <p className="week">周{dateObj.week}</p>
+      <p className="week">周{'x一二三四五六日'[dateObj.week]}</p>
       <p className="month--day">
         {dateObj.month}/{dateObj.day}
       </p>

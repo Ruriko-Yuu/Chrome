@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import StatisticsSpace from './models/statistics/index';
+import HexagramSpace from './models/hexagram/index';
 import Sortable from 'sortablejs';
 import bookmarkList from '../../plugins/bookmarks';
 import DateBlock from './models/date/index';
@@ -16,10 +17,17 @@ const defaultCollectionList = [
   {
     type: 'function',
     icon: '../../../../../public/media/image/icon/z23_2.png',
-    title: 'Azurlane',
-    value: 'StatisticsSpace',
+    title: '六爻',
+    value: 'Hexagram',
     href: '',
   },
+  // {
+  //   type: 'function',
+  //   icon: '../../../../../public/media/image/icon/z23_2.png',
+  //   title: 'Azurlane',
+  //   value: 'StatisticsSpace',
+  //   href: '',
+  // },
   {
     type: 'link',
     icon: 'https://fgo.wiki/favicon.ico',
@@ -116,7 +124,7 @@ class CollectionSpace extends React.Component<any> {
                   key={idx}
                   onClick={() => {
                     if (ele.type === 'function') {
-                      this.setState({ collectionActive: 'StatisticsSpace' });
+                      this.setState({ collectionActive: ele.value });
                     }
                   }}
                 >
@@ -148,15 +156,15 @@ class CollectionSpace extends React.Component<any> {
             )}
         </ul>
         <ul className="collection-space" id="sort"></ul>
-        {this.state.collectionActive === 'StatisticsSpace' ? (
+        {this.state.collectionActive === 'StatisticsSpace' && (
           <StatisticsSpace
             removeCollectionActive={this.removeCollectionActive}
           />
-        ) : (
-          <></>
-          // <StatisticsSpace
-          //   removeCollectionActive={this.removeCollectionActive}
-          // />
+        )}
+        {this.state.collectionActive === 'Hexagram' && (
+          <HexagramSpace
+            removeCollectionActive={this.removeCollectionActive}
+          />
         )}
       </>
     );

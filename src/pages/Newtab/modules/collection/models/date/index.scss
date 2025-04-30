@@ -1,7 +1,23 @@
 #date-space {
   flex-wrap: wrap;
+  /* 初始边框样式 */
+  border: 2px solid rgba(255, 25, 125, 0.5);
+  border-radius: 8px;
+  /* 呼吸灯动画效果 */
+  animation: breathing 1s infinite alternate;
   > p {
     width: 100%;
+  }
+}
+
+@keyframes breathing {
+  0% {
+    box-shadow: 0 0 5px rgba(255, 25, 125, 0.2);
+    border-color: rgba(255, 25, 125, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 25, 125, 0.8);
+    border-color: rgba(255, 25, 125, 1);
   }
 }
 .week {
