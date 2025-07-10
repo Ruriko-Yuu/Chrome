@@ -15,6 +15,7 @@
     "noEmit": false,
     "jsx": "react",
     "noImplicitThis": false,
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": ["src", "public/js/live2d"],
   "exclude": ["build", "node_modules"]

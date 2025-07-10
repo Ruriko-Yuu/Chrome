@@ -1,90 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import StatisticsSpace from './models/statistics/index';
-import HexagramSpace from './models/hexagram/index';
+import React from 'react';
 import Sortable from 'sortablejs';
 import bookmarkList from '../../plugins/bookmarks';
-import DateBlock from './models/date/index';
+import { defaultCollectionList } from './config';
 import './index.scss';
-
-const defaultCollectionList = [
-  {
-    type: 'block',
-    icon: '',
-    title: '',
-    value: 'date',
-    href: '',
-  },
-  {
-    type: 'function',
-    icon: '../../../../../public/media/image/icon/z23_2.png',
-    title: '六爻',
-    value: 'Hexagram',
-    href: '',
-  },
-  // {
-  //   type: 'function',
-  //   icon: '../../../../../public/media/image/icon/z23_2.png',
-  //   title: 'Azurlane',
-  //   value: 'StatisticsSpace',
-  //   href: '',
-  // },
-  {
-    type: 'link',
-    icon: 'https://fgo.wiki/favicon.ico',
-    href: 'https://fgo.wiki/w/%E9%A6%96%E9%A1%B5',
-    title: 'fgo-wiki',
-    value: 'link-fgo',
-  },
-  {
-    type: 'link',
-    icon: 'https://static.hdslb.com/images/favicon.ico',
-    href: 'https://wiki.biligame.com/blhx/%E9%A6%96%E9%A1%B5',
-    title: 'AL wiki',
-    value: 'link-azur',
-  },
-  {
-    type: 'link',
-    icon: 'https://github.githubassets.com/favicons/favicon.svg',
-    href: 'https://github.com/',
-    title: 'Github',
-    value: 'link-github',
-  },
-  {
-    type: 'link',
-    icon: 'https://threejs.org/files/favicon.ico',
-    href: 'https://threejs.org/docs/index.html#manual/zh/introduction/Creating-a-scene',
-    title: 'ThreeJs',
-    value: 'link-three',
-  },
-  {
-    type: 'link',
-    icon: 'https://pixijs.io/guides/static/images/pixijs-logo.svg',
-    href: 'https://pixijs.download/release/docs/index.html',
-    title: 'PixiJS',
-    value: 'link-pixijs',
-  },
-  {
-    type: 'link',
-    icon: 'https://mdn.alipayobjects.com/huamei_qa8qxu/afts/img/A*7svFR6wkPMoAAAAAAAAAAAAADmJ7AQ/original',
-    href: 'https://antv.vision/zh/',
-    title: 'antV',
-    value: 'link-antV',
-  },
-  {
-    type: 'link',
-    icon: 'https://es6.ruanyifeng.com/favicon.ico',
-    href: 'https://es6.ruanyifeng.com/',
-    title: 'ES6',
-    value: 'link-es6',
-  },
-  {
-    type: 'link',
-    icon: 'https://www.smashingmagazine.com/images/favicon/favicon.svg',
-    href: 'https://www.smashingmagazine.com/',
-    title: 'S & M',
-    value: 'link-sm',
-  },
-];
+import DateBlock from './models/date/index';
+import PerpetualCalendar from './models/date/PerpetualCalendar';
+import HexagramSpace from './models/hexagram/index';
+import StatisticsSpace from './models/statistics/index';
 class CollectionSpace extends React.Component<any> {
   state = {
     collectionList: defaultCollectionList,
@@ -119,26 +41,32 @@ class CollectionSpace extends React.Component<any> {
             .filter((ele) => ele)
             .map((ele, idx) =>
               ele.type === 'function' ? (
-                // style={{ gridColumn: 'span 3', gridRow: 'span 3' }}
-                <li
-                  key={idx}
-                  onClick={() => {
-                    if (ele.type === 'function') {
+                ele.value === 'Date' ? (
+                  <DateBlock
+                    dateBlockClick={() => {
                       this.setState({ collectionActive: ele.value });
-                    }
-                  }}
-                >
-                  <img
-                    src={
-                      ele.icon ||
-                      '../../../../../public/media/image/icon/404.jpg'
-                    }
-                    alt=""
+                    }}
+                    key={idx}
                   />
-                  <p>{ele.title || '🖐🏻🐟ing...'}</p>
-                </li>
-              ) : ele.type === 'block' && ele.value === 'date' ? (
-                <DateBlock key={idx} />
+                ) : (
+                  <li
+                    key={idx}
+                    onClick={() => {
+                      if (ele.type === 'function') {
+                        this.setState({ collectionActive: ele.value });
+                      }
+                    }}
+                  >
+                    <img
+                      src={
+                        ele.icon ||
+                        '../../../../../public/media/image/icon/404.jpg'
+                      }
+                      alt=""
+                    />
+                    <p>{ele.title || '🖐🏻🐟ing...'}</p>
+                  </li>
+                )
               ) : (
                 <li key={idx}>
                   <a href={ele.href}>
@@ -156,21 +84,23 @@ class CollectionSpace extends React.Component<any> {
             )}
         </ul>
         <ul className="collection-space" id="sort"></ul>
+        {this.state.collectionActive === 'Date' && (
+          <PerpetualCalendar
+            removeCollectionActive={this.removeCollectionActive}
+          />
+        )}
         {this.state.collectionActive === 'StatisticsSpace' && (
           <StatisticsSpace
             removeCollectionActive={this.removeCollectionActive}
           />
         )}
         {this.state.collectionActive === 'Hexagram' && (
-          <HexagramSpace
-            removeCollectionActive={this.removeCollectionActive}
-          />
+          <HexagramSpace removeCollectionActive={this.removeCollectionActive} />
         )}
       </>
     );
   }
-  componentDidMount() {
-    bookmarkList();
+  unNameFun = () => {
     chrome.storage.sync.get('collectionList', (v) => {
       console.log(v['collectionList'], defaultCollectionList);
       if (
@@ -203,6 +133,10 @@ class CollectionSpace extends React.Component<any> {
     if (el !== null) {
       sortable = Sortable.create(el, ops);
     }
+  };
+  componentDidMount() {
+    bookmarkList();
+    this.unNameFun()
   }
   componentWillUnmount() {}
 }
