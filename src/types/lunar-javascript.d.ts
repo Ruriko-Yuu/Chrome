@@ -4,8 +4,8 @@ declare module 'lunar-javascript' {
     static fromDate(date: Date): Lunar;
     toString(): string;
     getYearInGanZhi(): string;
-    getMonthInChinese(): string;
     getDayInChinese(): string;
+    getJieQi(): string;
     // 添加你需要的其他方法声明
   }
 }

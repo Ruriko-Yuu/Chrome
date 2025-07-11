@@ -1,5 +1,5 @@
-import React, { memo, useEffect, useState } from 'react';
 import { Lunar } from 'lunar-javascript';
+import React, { memo, useEffect, useState, useRef } from 'react';
 import './index.scss';
 
 const Newtab = memo<any>((props: any) => {
@@ -11,32 +11,43 @@ const Newtab = memo<any>((props: any) => {
     minute: '',
     second: '',
   });
-  const [lunar, setLunar] = useState<any>(Lunar.fromDate(new Date()));
+  const [lunar, setLunar] = useState<any>({});
+  const animationId: any = useRef(null);
   useEffect(() => {
     const animate = () => {
-      // 动画逻辑
       const time = new Date();
-      setDateObj({
-        week: time.getDay(),
-        month: time.getMonth() + 1,
-        day: time.getDate(),
-        hour:
-          time.getHours() < 10 ? `0${time.getHours()}` : `${time.getHours()}`,
-        minute:
-          time.getMinutes() < 10
-            ? `0${time.getMinutes()}`
-            : `${time.getMinutes()}`,
-        second:
-          time.getSeconds() < 10
-            ? `0${time.getSeconds()}`
-            : `${time.getSeconds()}`,
-      });
-      requestAnimationFrame(animate);
+      const second = time.getSeconds();
+      const minute = time.getMinutes();
+      const hour = time.getHours();
+      if (dateObj.second !== (second < 10 ? `0${second}` : `${second}`)) {
+        setDateObj({
+          week: time.getDay(),
+          month: time.getMonth() + 1,
+          day: time.getDate(),
+          hour: hour < 10 ? `0${hour}` : `${hour}`,
+          minute: minute < 10 ? `0${minute}` : `${minute}`,
+          second: second < 10 ? `0${second}` : `${second}`,
+        });
+        cancelAnimationFrame(animationId.current);
+      }
+      animationId.current = requestAnimationFrame(animate);
     };
+    animationId.current = requestAnimationFrame(animate);
+    // 清理函数
+    return () => {
+      if (animationId.current) {
+        cancelAnimationFrame(animationId.current);
+        animationId.current = undefined;
+      }
+    };
+  }, [dateObj.second]);
 
-    // 获取当前农历日期
-    setLunar(Lunar.fromDate(new Date()));
-    requestAnimationFrame(animate);
+  useEffect(() => {
+    const lunar = Lunar.fromDate(new Date());
+    setLunar({
+      string: lunar.toString(),
+      yearInGanZhi: lunar.getYearInGanZhi(),
+    });
   }, []);
 
   return (
@@ -53,8 +64,8 @@ const Newtab = memo<any>((props: any) => {
         {dateObj.month}/{dateObj.day}
       </p>
       <p>
-        {lunar.toString()}&nbsp;
-        {lunar.getYearInGanZhi()}
+        {lunar.string}&nbsp;
+        {lunar.yearInGanZhi}
       </p>
       <p className="hour--minute--second">
         {dateObj.hour}:{dateObj.minute}:{dateObj.second}
