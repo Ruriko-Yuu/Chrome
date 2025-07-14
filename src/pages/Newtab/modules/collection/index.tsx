@@ -6,6 +6,7 @@ import './index.scss';
 import DateBlock from './models/date/index';
 import PerpetualCalendar from './models/date/PerpetualCalendar';
 import HexagramSpace from './models/hexagram/index';
+import KeyboardSpace from './models/keyboard/index';
 import StatisticsSpace from './models/statistics/index';
 class CollectionSpace extends React.Component<any> {
   state = {
@@ -97,6 +98,9 @@ class CollectionSpace extends React.Component<any> {
         {this.state.collectionActive === 'Hexagram' && (
           <HexagramSpace removeCollectionActive={this.removeCollectionActive} />
         )}
+        {this.state.collectionActive === 'Keyboard' && (
+          <KeyboardSpace removeCollectionActive={this.removeCollectionActive} />
+        )}
       </>
     );
   }
@@ -136,7 +140,7 @@ class CollectionSpace extends React.Component<any> {
   };
   componentDidMount() {
     bookmarkList();
-    this.unNameFun()
+    this.unNameFun();
   }
   componentWillUnmount() {}
 }

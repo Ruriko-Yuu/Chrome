@@ -13,6 +13,13 @@ export const defaultCollectionList = [
     value: 'Hexagram',
     href: '',
   },
+  {
+    type: 'function',
+    icon: '../../../../../public/media/image/icon/z23_2.png',
+    title: '键盘测试',
+    value: 'Keyboard',
+    href: '',
+  },
   // {
   //   type: 'function',
   //   icon: '../../../../../public/media/image/icon/z23_2.png',
