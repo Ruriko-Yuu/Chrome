@@ -1,11 +1,33 @@
 import * as echarts from 'echarts';
 import React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
-const EChartsPreview = memo(({ options }: any) => {
+const EChartsPreview = memo(({ apm }: any) => {
   let chartInstance: echarts.ECharts | null = null;
   const chartRef = useRef<HTMLDivElement>(null);
-
   const [chart, setChart] = useState<any>();
+  const [apmList, setApmList] = useState<any>([]);
+  const [options, setOptions] = useState<any>({
+    grid: {
+      left: '10',
+      right: '10',
+      bottom: '10',
+      top: '10',
+      containLabel: true,
+    },
+    xAxis: {
+      type: 'category',
+      data: [],
+    },
+    yAxis: {
+      type: 'value',
+    },
+    series: [
+      {
+        data: [],
+        type: 'line',
+      },
+    ],
+  });
   /** 初始化图表方法 */
   const initChart = () => {
     if (
@@ -52,10 +74,34 @@ const EChartsPreview = memo(({ options }: any) => {
   }, []);
 
   useEffect(() => {
-    if (chart && options) {
-      chart.setOption(options);
+    const newTime = new Date().getTime();
+    setApmList([...apmList, apm].filter((item) => newTime - item.time < 5000));
+    if (chart) {
+      chart.setOption({
+        xAxis: {
+          data: apmList.map((ele: any) => ''),
+          axisTick: { show: false },
+          splitLine: {
+            show: false,
+          },
+          axisLabel: {
+            show: false,
+          },
+        },
+        yAxis: {
+          show: false,
+        },
+        series: [
+          {
+            data: apmList.map((ele: { value: any }) => ele.value),
+            symbol: 'circle',
+            symbolSize: 0,
+          },
+        ],
+      });
     }
-  }, [chart, options]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chart, apm]);
   return <div ref={chartRef} style={{ width: '100%', height: '100%' }}></div>;
 });
 

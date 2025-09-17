@@ -218,4 +218,5 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     //   console.log('赋值成功');
     // });
   });
+  console.log('目标https://www.nutridata.cn/database/ingredient/1?date=1757997668753&typer=search&baseId=1',window.location.href);
 })();
