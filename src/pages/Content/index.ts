@@ -178,6 +178,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       }, 1e3);
     }
   }
+  localStorage.setItem('gensokyo', 'ruriko');
   if (
     'https://www.bilibili.com/'.indexOf(window.location.href.split('?')[0]) !==
     -1
@@ -187,6 +188,70 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       'color:white;background: #4386FE;padding: 3px 10px;border-radius: 3px'
     );
     myBtn()
+  }
+
+  if (~window.location.href.indexOf('ostsc.cn')) {
+    window.onload = () => {
+      const loopList = ['乳品类', '加工调理食品及其他类', '坚果及种子类', '水果类', '油脂类', '淀粉类', '糕饼点心类', '糖类', '肉类', '菇类', '蔬菜类', '藻类', '蛋类', '调味料及香辛料类', '谷物类', '豆类', '饮料类', '鱼贝类']
+      const nowLoopIndex:any = localStorage.getItem('nowLoopIndex') || 0
+      const nowLoopId:any = localStorage.getItem('nowLoopId') || 0
+      if (window.location.pathname === '/category.php') {
+        const theOne:any = document.getElementsByClassName('card-body')[0].children[0].children[nowLoopId % 20]
+        if (!theOne || theOne.children[0].innerText === '该分类下暂无食品数据') {
+          localStorage.setItem('nowLoopIndex', `${Number(nowLoopIndex) + 1}`)
+          localStorage.setItem('nowLoopId', '0')
+          window.location.href = `https://ostsc.cn/category.php?type=${loopList[Number(nowLoopIndex) + 1]}&page=1`
+        } else {
+          window.location.href = theOne.children[0].children?.[0]?.children?.[2]?.href || theOne.children[0].children[0].children[1].href
+        }
+      } else if (~window.location.pathname.indexOf('/static/food/')) {
+        const ostsc = JSON.parse(localStorage.getItem('ostsc') || '{}')
+        let length = 0
+        for (const key in ostsc) {
+          if (!Object.hasOwn(ostsc, key)) continue;
+          length++
+        }
+        console.log('数据条数', length, '空间大小', (localStorage.getItem('ostsc') || '').length / (2 ** 10))
+        let obj:any = { yy: {} }
+        const card:any = document.getElementsByClassName('card')[0].children[0].children[0].children[0]
+        obj.name = card.children[0].innerText
+        const alias = card.children[1].innerText
+        if (alias.indexOf('通用名称')) {
+          obj.alias = alias.replace('通用名称：', '').split(',')
+        }
+        obj.type = card.children[2]?.children?.[1]?.innerText || card.children?.[1]?.children?.[1]?.innerText
+        const warning:any = document.getElementsByClassName('alert-warning')[0]
+        if (warning) {
+          obj.warning = warning.children[1].innerText
+        }
+        const sp:any = document.getElementsByClassName('special-groups')[0]
+        if (sp) {
+          obj.sp = sp.children[1].innerText.split('\n')
+        }
+        const list:any = document.getElementsByClassName('table-responsive')[0].children[0].children[1].children
+        for (let index = 0; index < list.length; index++) {
+          obj['yy'][list[index].children[0].innerText] = {
+            value: list[index].children[1].innerText.replace(',', ''),
+            unit: list[index].children[2].innerText
+          }
+        }
+        const price:any = document.getElementsByClassName('card')[2].children[1].children[1].children
+        let priceList = []
+        for (let i = 0; i < price.length; i++) {
+          priceList.push({
+            type: ~price[i].children[0].className.indexOf('text-success') ? 'good' : 'bad',
+            text: price[i].innerText
+          })
+        }
+        obj.price = priceList
+        localStorage.setItem('ostsc', JSON.stringify({ ...ostsc, [obj.name]: obj }))
+        localStorage.setItem('nowLoopId', `${Number(nowLoopId) + 1}`)
+        window.location.href = `https://ostsc.cn/category.php?type=${loopList[nowLoopIndex]}&page=${Math.max(1, Math.ceil((Number(nowLoopId) + 1) / 20))}`
+      } else {
+        window.location.href = `https://ostsc.cn/category.php?type=${loopList[nowLoopIndex]}&page=${Math.max(1, Math.ceil(nowLoopId / 20))}`
+      }
+
+    }
   }
 
   const countDown = () => {
@@ -218,5 +283,5 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     //   console.log('赋值成功');
     // });
   });
-  console.log('目标https://www.nutridata.cn/database/ingredient/1?date=1757997668753&typer=search&baseId=1',window.location.href);
+  console.log('目标https://www.nutridata.cn/database/ingredient/1?date=1757997668753&typer=search&baseId=1', window.location.href);
 })();
