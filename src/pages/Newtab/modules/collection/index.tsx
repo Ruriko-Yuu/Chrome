@@ -57,6 +57,7 @@ class CollectionSpace extends React.Component<any> {
                         this.setState({ collectionActive: ele.value });
                       }
                     }}
+                    style={{ cursor: 'pointer' }}
                   >
                     <img
                       src={

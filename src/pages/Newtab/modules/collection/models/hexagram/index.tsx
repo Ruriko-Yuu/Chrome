@@ -1,53 +1,56 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { GUA_OBJ, guaObjKeys } from './k';
-// import DS from './ds'
 import './index.scss';
 const HexagramSpace = memo<any>((props: any) => {
   const [state, setState] = useState({ loadOver: true });
-  const [hexagramResult, setHexagramResult] = useState<Array<string>>([]);
-  const [gua, setGua] = useState<string>('');
-  const [statistics, setStatistics] = useState<any>({});
-  const blockTime = () => {
-    const resultList = Array(3).fill(Math.random() > 0.5 ? 'o' : 'x');
-    return ['⚋⨯', '⚋⁼', '⚊、', '⚊°'][
-      resultList.filter((ele) => ele === 'o').length
-    ];
-  };
-  const blockOne = () => {
-    if (hexagramResult.length < 6) {
-      setHexagramResult([...hexagramResult, blockTime()]);
-    } else {
-      setHexagramResult([blockTime()]);
-    }
+  const [coinList, setCoinList] = useState<number[]>([]);
+  const [yao, setYao] = useState<string[]>([]);
+  const [gua, setGua] = useState<string[]>([]);
+  const doCoin = () => {
+    return Math.random() > 0.5 ? 1 : 0;
   };
 
-  const blockSix = () => {
-    setHexagramResult(
-      Array(6)
-        .fill('')
-        .map(() => blockTime())
+  const doOne = () => {
+    if (coinList.length < 18) {
+      setCoinList([...new Array(3).fill(0).map(doCoin), ...coinList]);
+    } else {
+      setCoinList([...new Array(3).fill(0).map(doCoin)]);
+    }
+  };
+  useEffect(() => {
+    function groupCoinsByThree(coinList: number[]) {
+      const groups = [];
+      for (let i = 0; i < coinList.length; i += 3) {
+        groups.push(coinList.slice(i, i + 3));
+      }
+      return groups;
+    }
+    const iYao = groupCoinsByThree(coinList).map(
+      (ele) => `${ele.join('').replace(/0/g, '').length}`
     );
-  };
-  useEffect(() => {
-    if (hexagramResult.length === 6) {
-      const hexagramResultSimple = hexagramResult
-        .map((ele) => (ele === '⚊°' || ele === '⚊、' ? 'o' : 'x'))
-        .join('') as guaObjKeys;
-      const hexagramResultSimple2Gua = (hexagramResultSimple: guaObjKeys) => {
-        return GUA_OBJ[hexagramResultSimple] || '';
-      };
-      setGua(hexagramResultSimple2Gua(hexagramResultSimple));
-    } else {
-      setGua('');
-    }
-  }, [hexagramResult]);
-
-  useEffect(() => {
-    if (gua) {
-      const guaStatistics = statistics[gua] || 0;
-      setStatistics({ ...statistics, [gua]: guaStatistics + 1 });
-    }
-  }, [gua]);
+    setYao(iYao);
+    const iGuaA: guaObjKeys = iYao
+      .map((ele) => {
+        return {
+          '0': 'x',
+          '1': 'x',
+          '2': 'o',
+          '3': 'o',
+        }[ele];
+      })
+      .join('') as guaObjKeys;
+    const iGuaB: guaObjKeys = iYao
+      .map((ele) => {
+        return {
+          '0': 'o',
+          '1': 'x',
+          '2': 'o',
+          '3': 'x',
+        }[ele];
+      })
+      .join('') as guaObjKeys;
+    setGua([GUA_OBJ[iGuaA]?.name, GUA_OBJ[iGuaB]?.name]);
+  }, [coinList]);
   return (
     <div className="hexagram-space">
       <div className={state.loadOver ? 'content over' : 'content'}>
@@ -62,18 +65,19 @@ const HexagramSpace = memo<any>((props: any) => {
         >
           ✖
         </i>
-        <div>
-          <button onClick={blockOne}>掷一</button>
-          <button onClick={blockSix}>掷六</button>
+        <div onClick={doOne}>起一</div>
+        {[...coinList].reverse().map((ele) => (ele ? '正' : '反'))}
+        <br></br>
+        <div style={{ display: 'flex' }}>
+          <div>
+            起卦（得本卦）
+            {gua[0]}
+          </div>
+          <div>
+            起卦（得之卦）
+            {gua[1]}
+          </div>
         </div>
-        <div style={{ lineHeight: '3px' }}>
-          {hexagramResult.map((ele, idx) => (
-            <p key={idx}>{ele.replace(/[⨯⁼、°]/g, '')}</p>
-          ))}
-        </div>
-        <div>{gua}</div>
-        <div>统计{JSON.stringify(statistics)}</div>
-        {/* <DS/> */}
       </div>
     </div>
   );
