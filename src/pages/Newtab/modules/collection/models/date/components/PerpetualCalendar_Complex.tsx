@@ -62,10 +62,15 @@ const PerpetualCalendar_Complex = memo<any>((props: any) => {
     // 调用函数
     getLocation();
 
-    let timer:any;
+    let timer: any;
     // 计算APM
     function gameLoop() {
-      console.log('时角', sunRote(latLonRef.current.lon), '赤纬', sunRote(new Date()));
+      console.log(
+        '时角',
+        sunRote(latLonRef.current.lon),
+        '赤纬',
+        sunδ(new Date())
+      );
       timer = requestAnimationFrame(gameLoop);
     }
     gameLoop();
