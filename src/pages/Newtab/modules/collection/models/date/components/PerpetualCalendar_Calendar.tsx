@@ -94,7 +94,19 @@ const PerpetualCalendar_Calendar = memo<any>((props: any) => {
                 setSelectMonth(calMonth);
                 setSelectDate(ele?.date);
               }}
-              className={calDate === ele?.date ? 'this' : ''}
+              className={`${
+                calDate === ele?.date &&
+                `${calYear}-${calMonth + 1}` === dayjs().format('YYYY-MM')
+                  ? 'this'
+                  : ''
+              } ${
+                props.date ===
+                `${calYear}-${calMonth + 1}-${ele?.date < 10 ? '0' : ''}${
+                  ele?.date
+                }`
+                  ? 'active'
+                  : ''
+              }`}
             >
               <div>
                 <p>{ele?.date}</p>

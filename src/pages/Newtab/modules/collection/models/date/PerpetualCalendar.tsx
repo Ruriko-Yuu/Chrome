@@ -24,7 +24,7 @@ const HexagramSpace = memo<any>((props: any) => {
         </i>
         <div className="left--right">
           <div className="left">
-            <PerpetualCalendarCalendar selectDate={selectDate} />
+            <PerpetualCalendarCalendar selectDate={selectDate} date={date} />
           </div>
           <div className="right">
             <PerpetualCalendarComplex date={date} />
