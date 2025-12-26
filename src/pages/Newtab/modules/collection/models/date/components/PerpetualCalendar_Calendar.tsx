@@ -101,9 +101,9 @@ const PerpetualCalendar_Calendar = memo<any>((props: any) => {
                   : ''
               } ${
                 props.date ===
-                `${calYear}-${calMonth + 1}-${ele?.date < 10 ? '0' : ''}${
-                  ele?.date
-                }`
+                `${calYear}-${calMonth + 1 < 10 ? '0' : ''}${calMonth + 1}-${
+                  ele?.date < 10 ? '0' : ''
+                }${ele?.date}`
                   ? 'active'
                   : ''
               }`}
