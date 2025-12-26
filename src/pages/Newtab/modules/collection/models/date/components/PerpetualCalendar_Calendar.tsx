@@ -45,13 +45,14 @@ const PerpetualCalendar_Calendar = memo<any>((props: any) => {
       dayjs()
         .set('year', selectYear)
         .set('month', selectMonth)
-        .set('date', selectDate).format('YYYY-MM-DD')
+        .set('date', selectDate)
+        .format('YYYY-MM-DD')
     );
   }, [props, selectYear, selectMonth, selectDate]);
 
   return (
     <div className="perpetual-calendar-calendar">
-      <div>
+      <div style={{ display: 'flex' }}>
         <p
           onClick={() => {
             if (calMonth === 0) {
@@ -93,6 +94,7 @@ const PerpetualCalendar_Calendar = memo<any>((props: any) => {
                 setSelectMonth(calMonth);
                 setSelectDate(ele?.date);
               }}
+              className={calDate === ele?.date ? 'this' : ''}
             >
               <div>
                 <p>{ele?.date}</p>

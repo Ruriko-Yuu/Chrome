@@ -18,6 +18,9 @@
       height: 100%;
       border-radius: 0.5rem;
       cursor: pointer;
+      &.this {
+        background-color: #f3f3f3;
+      }
     }
   }
 }

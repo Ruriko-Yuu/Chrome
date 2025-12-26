@@ -54,7 +54,7 @@ const Newtab = memo<any>((props: any) => {
     <li
       id="date-space"
       className="x-flex"
-      style={{ gridColumn: 'span 2', gridRow: 'span 2' }}
+      style={{ gridColumn: 'span 2', gridRow: 'span 2', cursor: 'pointer' }}
       onClick={() => {
         props.dateBlockClick();
       }}
