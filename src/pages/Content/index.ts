@@ -193,10 +193,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (~window.location.href.indexOf('ostsc.cn')) {
     window.onload = () => {
       const loopList = ['乳品类', '加工调理食品及其他类', '坚果及种子类', '水果类', '油脂类', '淀粉类', '糕饼点心类', '糖类', '肉类', '菇类', '蔬菜类', '藻类', '蛋类', '调味料及香辛料类', '谷物类', '豆类', '饮料类', '鱼贝类']
-      const nowLoopIndex:any = localStorage.getItem('nowLoopIndex') || 0
-      const nowLoopId:any = localStorage.getItem('nowLoopId') || 0
+      const nowLoopIndex: any = localStorage.getItem('nowLoopIndex') || 0
+      const nowLoopId: any = localStorage.getItem('nowLoopId') || 0
       if (window.location.pathname === '/category.php') {
-        const theOne:any = document.getElementsByClassName('card-body')[0].children[0].children[nowLoopId % 20]
+        const theOne: any = document.getElementsByClassName('card-body')[0].children[0].children[nowLoopId % 20]
         if (!theOne || theOne.children[0].innerText === '该分类下暂无食品数据') {
           localStorage.setItem('nowLoopIndex', `${Number(nowLoopIndex) + 1}`)
           localStorage.setItem('nowLoopId', '0')
@@ -212,30 +212,30 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           length++
         }
         console.log('数据条数', length, '空间大小', (localStorage.getItem('ostsc') || '').length / (2 ** 10))
-        let obj:any = { yy: {} }
-        const card:any = document.getElementsByClassName('card')[0].children[0].children[0].children[0]
+        let obj: any = { yy: {} }
+        const card: any = document.getElementsByClassName('card')[0].children[0].children[0].children[0]
         obj.name = card.children[0].innerText
         const alias = card.children[1].innerText
         if (alias.indexOf('通用名称')) {
           obj.alias = alias.replace('通用名称：', '').split(',')
         }
         obj.type = card.children[2]?.children?.[1]?.innerText || card.children?.[1]?.children?.[1]?.innerText
-        const warning:any = document.getElementsByClassName('alert-warning')[0]
+        const warning: any = document.getElementsByClassName('alert-warning')[0]
         if (warning) {
           obj.warning = warning.children[1].innerText
         }
-        const sp:any = document.getElementsByClassName('special-groups')[0]
+        const sp: any = document.getElementsByClassName('special-groups')[0]
         if (sp) {
           obj.sp = sp.children[1].innerText.split('\n')
         }
-        const list:any = document.getElementsByClassName('table-responsive')[0].children[0].children[1].children
+        const list: any = document.getElementsByClassName('table-responsive')[0].children[0].children[1].children
         for (let index = 0; index < list.length; index++) {
           obj['yy'][list[index].children[0].innerText] = {
             value: list[index].children[1].innerText.replace(',', ''),
             unit: list[index].children[2].innerText
           }
         }
-        const price:any = document.getElementsByClassName('card')[2].children[1].children[1].children
+        const price: any = document.getElementsByClassName('card')[2].children[1].children[1].children
         let priceList = []
         for (let i = 0; i < price.length; i++) {
           priceList.push({
@@ -284,4 +284,130 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     // });
   });
   console.log('目标https://www.nutridata.cn/database/ingredient/1?date=1757997668753&typer=search&baseId=1', window.location.href);
+})();
+
+// 针对 antchensw.cn 的自动点击脚本
+(function () {
+  console.log('🪳 Ruriko工具箱已加载，目标网站:', window.location.href);
+
+  // 只针对目标网站执行
+  if (!window.location.hostname.includes('antchensw.cn')) {
+    console.log('⚠️ 当前网站不是目标网站，工具箱停止执行');
+    return;
+  }
+  const router = (document as any).getElementById('app').__vue_app__.config.globalProperties.$router
+  const fourMinGetBugList = () => {
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    // 检查时间条件
+    if (minutes % 4 === 0 && (seconds === 0 || seconds === 2 || seconds === 4)) {
+      console.log(`⏰ 时间条件满足 (分钟:${minutes}, 秒:${seconds})，执行重定向到朋友页面`);
+      router.push('/friend?p=1&t=5&w=')
+    } else {
+      console.log(`⏰ 时间条件不满足 (分钟:${minutes}, 秒:${seconds})，继续检查蟑螂选项`);
+    }
+  }
+  const AT = () => {
+    setTimeout(() => {
+      // 情况1: 匹配页面 - friend页面
+      if (window.location.href.indexOf('http://antchensw.cn/friend?') !== -1) {
+        console.log('📍 当前在朋友列表页面，开始检查时间条件和蟑螂选项');
+
+        fourMinGetBugList()
+
+        // 查找蟑螂单选按钮
+        const cockroachRadio: any = document.querySelector('input[type="radio"][value="蟑螂"]')
+          || Array.from(document.querySelectorAll('input[type="radio"]')).find(radio => {
+            const label: any = document.querySelector(`label[for="${radio.id}"]`);
+            return label ? label.innerText.includes('蟑螂') : false;
+          });
+
+        if (cockroachRadio) {
+          console.log('✅ 找到蟑螂选项:', cockroachRadio);
+
+          if (cockroachRadio.checked) {
+            console.log('🪳 蟑螂选项已选中，查找bi-bug元素');
+            const roundedPill: any = document.getElementsByClassName('bi-bug');
+
+            if (roundedPill.length) {
+              console.log('🔍 找到bi-bug元素，准备跳转到:', roundedPill[0].parentElement.parentElement.href);
+              router.push(
+                roundedPill[0].parentElement.parentElement.href.replace('http://antchensw.cn', '')
+              )
+              // window.location.href = roundedPill[0].parentElement.parentElement.href;
+            } else {
+              console.log('❌ 未找到bi-bug元素，无法跳转');
+            }
+          } else {
+            console.log('🪳 蟑螂选项未选中，正在执行自动点击');
+            // 执行点击
+            cockroachRadio.click();
+            // 额外触发 change 事件
+            cockroachRadio.dispatchEvent(new Event('change', { bubbles: true }));
+            console.log('✅ 已自动切换到蟑螂选项');
+
+            // 验证当前选中的值
+            const selected: any = document.querySelector('input[type="radio"]:checked');
+            console.log('📊 当前选中的选项:', selected ? (selected.value || '通过文字匹配的选项') : '无');
+          }
+        } else {
+          console.log('❌ 找不到蟑螂选项，请手动检查页面上的单选框内容');
+          console.log('📝 页面中所有单选框:', document.querySelectorAll('input[type="radio"]'));
+        }
+
+      }
+      // 情况2: 详情页面 - friend/info页面
+      else if (window.location.href.indexOf('http://antchensw.cn/friend/info?') !== -1) {
+        console.log('📍 当前在朋友详情页面，开始处理bi-bug元素');
+
+        const bug: any = document.getElementsByClassName('bi-bug');
+
+        if (bug.length) {
+          console.log(`🔍 找到 ${bug.length} 个bi-bug元素，开始处理`);
+
+          for (let i = 0; i < bug.length; i++) {
+            console.log(`🔄 处理第 ${i + 1}/${bug.length} 个bi-bug元素`);
+
+            if (bug[i].parentElement.tagName === 'A') {
+              console.log(`📎 第${i + 1}个元素父级是链接标签`);
+
+              if (bug[i].parentElement.className.indexOf('dropdown-item') !== -1 && i === bug.length - 1) {
+                console.log('🎯 这是最后一个下拉菜单项，跳转到朋友列表页');
+                router.push('/friend?p=1&t=5&w=')
+              } else {
+                console.log(`🖱️ 点击第${i + 1}个bi-bug的父级链接`);
+                bug[i].parentElement.click();
+              }
+            } else {
+              // 切换到蟑螂楼层
+              const grandParent = bug[i].parentElement.parentElement;
+              console.log(`📁 检查第${i + 1}个元素的祖父元素:`, grandParent);
+
+              if (grandParent.className.indexOf('active') === -1) {
+                console.log('🖱️ 祖父元素未激活，执行点击');
+                grandParent.click();
+              } else {
+                console.log('✅ 祖父元素已激活，无需点击');
+              }
+            }
+          }
+        } else {
+          console.log('❌ 未找到bi-bug元素，跳转到朋友列表页');
+          router.push('/friend?p=1&t=5&w=')
+        }
+      }
+      // 情况3: 其他页面
+      else {
+        console.log('📍 当前在其他页面，跳过处理');
+      }
+
+      console.log('🔄 继续执行下一次循环检查');
+      AT();
+    }, ~~(Math.random() * 100) + 1000);
+  };
+
+  console.log('🚀 启动Ruriko工具箱循环检查');
+  AT();
 })();
