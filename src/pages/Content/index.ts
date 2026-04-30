@@ -287,7 +287,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 })();
 
 (function () {
-
   // 只针对目标网站执行
   if (!window.location.hostname.includes('antchensw.cn')) {
     console.info('⚠️ 当前网站不是目标网站，工具箱停止执行');
@@ -295,121 +294,250 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
   console.info('🪳杀手已加载');
 
-  // const router = (document as any).getElementById('app').__vue_app__.config.globalProperties.$router
-  const router = { push: (url) => { } }
+  // 从 localStorage 读取上次的状态，默认为 false（关闭）
+  const getStoredEnabled = () => {
+    const stored = localStorage.getItem('ruriko-killer-enabled');
+    return stored === 'true'; // 只有明确为 'true' 才返回 true，否则 false
+  };
+
+  // 保存状态到 localStorage
+  const saveEnabled = (value) => {
+    localStorage.setItem('ruriko-killer-enabled', value);
+  };
+
+  // 全局控制标志 - 从存储中读取
+  let isEnabled = getStoredEnabled();
+  let timeoutId = null;
+
+  // 路由器模拟/覆盖
+  const router = { push: (url) => { } };
   router.push = (url) => {
     console.info('📍 跳转页面:', url);
-    window.location.href = 'http://antchensw.cn' + url
-  }
+    window.location.href = 'http://antchensw.cn' + url;
+  };
 
+  // 四分钟抓取逻辑
   const fourMinGetBugList = () => {
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
-
-    // 检查时间条件
     if (minutes % 4 === 0 && (seconds === 0 || seconds === 2 || seconds === 4)) {
       console.info(`⏰ 时间条件满足 (分钟:${minutes}, 秒:${seconds})，执行重定向到朋友页面`);
-      router.push('/friend?p=1&t=5&w=')
+      router.push('/friend?p=1&t=5&w=');
     } else {
       console.info(`⏰ 时间条件不满足 (分钟:${minutes}, 秒:${seconds})，继续检查蟑螂选项`);
     }
-  }
-  const AT = () => {
-    setTimeout(() => {
-      console.info((document as any).getElementById('app').__vue_app__)
-      // .config.globalProperties.$router
-      // 情况1: 匹配页面 - friend页面
-      if (window.location.href.indexOf('http://antchensw.cn/friend?') !== -1) {
-        console.info('📍 当前在朋友列表页面，开始检查时间条件和蟑螂选项');
+  };
 
-        fourMinGetBugList();
+  // 主要逻辑
+  const runMainLogic = () => {
+    if (!isEnabled) {
+      // 关闭状态，不执行任何操作
+      return;
+    }
 
-        // 查找蟑螂单选按钮
-        const cockroachRadio: any = document.querySelector('input[type="radio"][value="蟑螂"]')
-          || Array.from(document.querySelectorAll('input[type="radio"]')).find(radio => {
-            const label: any = document.querySelector(`label[for="${radio.id}"]`);
-            return label ? label.innerText.includes('蟑螂') : false;
-          });
+    // 情况1: 匹配页面 - friend页面
+    if (window.location.href.indexOf('http://antchensw.cn/friend?') !== -1) {
+      console.info('📍 当前在朋友列表页面，开始检查时间条件和蟑螂选项');
 
-        if (cockroachRadio) {
-          console.info('✅ 找到蟑螂选项:', cockroachRadio);
+      fourMinGetBugList();
 
-          if (cockroachRadio.checked) {
-            console.info('🪳 蟑螂选项已选中，查找bi-bug元素');
-            const roundedPill: any = document.getElementsByClassName('bi-bug');
+      // 查找蟑螂单选按钮
+      const cockroachRadio: any = document.querySelector('input[type="radio"][value="蟑螂"]')
+        || Array.from(document.querySelectorAll('input[type="radio"]')).find(radio => {
+          const label: any = document.querySelector(`label[for="${radio.id}"]`);
+          return label ? label.innerText.includes('蟑螂') : false;
+        });
 
-            if (roundedPill.length) {
-              // const indexVal = ~~(Math.random() * roundedPill.length)
-              const indexVal = 0
-              const url = roundedPill[indexVal].parentElement.parentElement.href.replace('http://antchensw.cn', '')
-              router.push(url);
-            } else {
-              console.info('❌ 未找到bi-bug元素，无法跳转');
-            }
+      if (cockroachRadio) {
+        console.info('✅ 找到蟑螂选项:', cockroachRadio);
+
+        if (cockroachRadio.checked) {
+          console.info('🪳 蟑螂选项已选中，查找bi-bug元素');
+          const roundedPill: any = document.getElementsByClassName('bi-bug');
+
+          if (roundedPill.length) {
+            const indexVal = 0;
+            const url = roundedPill[indexVal].parentElement.parentElement.href.replace('http://antchensw.cn', '');
+            router.push(url);
           } else {
-            console.info('🪳 蟑螂选项未选中，正在执行自动点击');
-            cockroachRadio.click();
-            cockroachRadio.dispatchEvent(new Event('change', { bubbles: true }));
-            console.info('✅ 已自动切换到蟑螂选项');
-            const selected: any = document.querySelector('input[type="radio"]:checked');
-            console.info('📊 当前选中的选项:', selected ? (selected.value || '通过文字匹配的选项') : '无');
+            console.info('❌ 未找到bi-bug元素，无法跳转');
           }
         } else {
-          console.info('❌ 找不到蟑螂选项，请手动检查页面上的单选框内容');
-          console.info('📝 页面中所有单选框:', document.querySelectorAll('input[type="radio"]'));
+          console.info('🪳 蟑螂选项未选中，正在执行自动点击');
+          cockroachRadio.click();
+          cockroachRadio.dispatchEvent(new Event('change', { bubbles: true }));
+          console.info('✅ 已自动切换到蟑螂选项');
+          const selected: any = document.querySelector('input[type="radio"]:checked');
+          console.info('📊 当前选中的选项:', selected ? (selected.value || '通过文字匹配的选项') : '无');
         }
+      } else {
+        console.info('❌ 找不到蟑螂选项，请手动检查页面上的单选框内容');
+        console.info('📝 页面中所有单选框:', document.querySelectorAll('input[type="radio"]'));
       }
-      // 情况2: 详情页面 - friend/info页面
-      else if (window.location.href.indexOf('http://antchensw.cn/friend/info?') !== -1) {
-        console.info('到达好友餐厅');
+    }
+    // 情况2: 详情页面 - friend/info页面
+    else if (window.location.href.indexOf('http://antchensw.cn/friend/info?') !== -1) {
+      console.info('到达好友餐厅');
 
-        const bug: any = document.getElementsByClassName('bi-bug');
-        if (bug.length) {
-          console.info('🎉到达好友餐厅,发现蟑螂');
-          let bugNum = 0
-          let bugFloor = false
-          for (let i = 0; i < bug.length; i++) {
-            const tagName = bug[i].parentElement.tagName
-            const isMyBug = bug[i].className.indexOf('text-success') !== -1
-            if (tagName === 'SPAN') {
-              const haveBugFloor = bug[i].parentElement.parentElement
-              if (haveBugFloor.className.indexOf('active') === -1 && !bugFloor) {
-                console.info('当前未在有蟑螂的楼层,正在前往该楼层');
-                haveBugFloor.click();
-                AT()
-                return;
-              } else {
-                console.info('当前已在有蟑螂的楼层');
-                bugFloor = true
-              }
-            } else if (tagName === 'A' && !isMyBug) {
-              if (bug[i].parentElement.innerHTML.indexOf('bi-shield-exclamation') !== -1) {
-                console.info('🪳 发现蟑螂，正在点击');
-                bug[i].parentElement.click();
-                bugNum++
-              }
+      const bug = document.getElementsByClassName('bi-bug');
+      if (bug.length) {
+        console.info('🎉到达好友餐厅,发现蟑螂');
+        let bugNum = 0;
+        let bugFloor = false;
+        for (let i = 0; i < bug.length; i++) {
+          const tagName = bug[i].parentElement.tagName;
+          const isMyBug = bug[i].className.indexOf('text-success') !== -1;
+          if (tagName === 'SPAN') {
+            const haveBugFloor = bug[i].parentElement.parentElement;
+            if (haveBugFloor.className.indexOf('active') === -1 && !bugFloor) {
+              console.info('当前未在有蟑螂的楼层,正在前往该楼层');
+              haveBugFloor.click();
+              // 不递归调用，等待下一次循环
+              return;
+            } else {
+              console.info('当前已在有蟑螂的楼层');
+              bugFloor = true;
+            }
+          } else if (tagName === 'A' && !isMyBug) {
+            if (bug[i].parentElement.innerHTML.indexOf('bi-shield-exclamation') !== -1) {
+              console.info('🪳 发现蟑螂，正在点击');
+              bug[i].parentElement.click();
+              bugNum++;
             }
           }
-          if (bugNum === 0) {
-            console.info('🎯 没有蟑螂，跳转到朋友列表页');
+        }
+        if (bugNum === 0) {
+          const floor = document.getElementsByClassName('goodslevel');
+          if (floor.length) {
+            console.info('🎯楼层加载 ~ 没有蟑螂，跳转到朋友列表页');
             router.push('/friend?p=1&t=5&w=');
           }
-        } else {
-          console.info('❌ 未找到bi-bug元素，跳转到朋友列表页');
+        }
+      } else {
+        const floor = document.getElementsByClassName('goodslevel');
+        if (floor.length) {
           router.push('/friend?p=1&t=5&w=');
         }
       }
-      // 情况3: 其他页面
-      else {
-        console.info('📍 当前在其他页面，跳过处理');
-      }
-
-      console.info('🔄 继续执行下一次循环检查');
-      AT();
-    }, ~~(Math.random() * 100) + 1000);
+    }
+    // 情况3: 其他页面
+    else {
+      console.info('📍 当前在其他页面，跳过处理');
+    }
   };
 
-  console.info('🚀 启动Ruriko工具箱循环检查');
-  AT();
+  // 循环执行
+  const loop = () => {
+    runMainLogic();
+    if (isEnabled) {
+      console.info('🔄 工具箱运行中，继续下一次循环检查');
+    }
+    timeoutId = setTimeout(loop, ~~(Math.random() * 100) + 1000);
+  };
+
+  // 更新控制面板UI（如果存在）
+  const updatePanelUI = () => {
+    const statusText = document.getElementById('ruriko-status');
+    const toggleBtn = document.getElementById('ruriko-toggle');
+    if (!statusText || !toggleBtn) return;
+
+    if (isEnabled) {
+      statusText.innerText = '● 运行中';
+      statusText.style.color = '#6bff6b';
+      toggleBtn.innerText = '关闭';
+      toggleBtn.style.background = '#6b6bff';
+    } else {
+      statusText.innerText = '● 已关闭';
+      statusText.style.color = '#ff6b6b';
+      toggleBtn.innerText = '开启';
+      toggleBtn.style.background = '#ff6b6b';
+    }
+  };
+
+  // 创建控制面板UI
+  const createControlPanel = () => {
+    // 检查是否已存在面板
+    if (document.getElementById('ruriko-control-panel')) {
+      updatePanelUI();
+      return;
+    }
+
+    const panel = document.createElement('div');
+    panel.id = 'ruriko-control-panel';
+    panel.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 99999;
+      background: #1e1e2f;
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      font-family: system-ui, -apple-system, 'Segoe UI', monospace;
+      font-size: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+    `;
+
+    const statusText = document.createElement('span');
+    statusText.id = 'ruriko-status';
+    statusText.style.cssText = `
+      color: #ff6b6b;
+      font-weight: bold;
+      letter-spacing: 1px;
+    `;
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'ruriko-toggle';
+    toggleBtn.style.cssText = `
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    `;
+    toggleBtn.onmouseenter = () => {
+      toggleBtn.style.transform = 'scale(1.02)';
+    };
+    toggleBtn.onmouseleave = () => {
+      toggleBtn.style.transform = 'scale(1)';
+    };
+
+    toggleBtn.onclick = () => {
+      isEnabled = !isEnabled;
+      saveEnabled(isEnabled);  // 保存到 localStorage
+      updatePanelUI();
+      if (isEnabled) {
+        console.info('🚀 工具箱已开启，开始自动执行');
+      } else {
+        console.info('⏸️ 工具箱已关闭，停止自动执行');
+      }
+    };
+
+    panel.appendChild(statusText);
+    panel.appendChild(toggleBtn);
+    document.body.appendChild(panel);
+
+    // 设置初始UI状态
+    updatePanelUI();
+  };
+
+  // 启动循环（即使关闭状态也会运行loop，但runMainLogic会被isEnabled拦截）
+  const start = () => {
+    createControlPanel();
+    loop();
+    const statusMsg = isEnabled ? '开启' : '关闭';
+    console.info(`🎮 控制面板已添加，当前状态：${statusMsg}（状态已持久化，刷新/切页后保持）`);
+  };
+
+  start();
 })();
