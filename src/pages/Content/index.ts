@@ -286,16 +286,22 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.log('目标https://www.nutridata.cn/database/ingredient/1?date=1757997668753&typer=search&baseId=1', window.location.href);
 })();
 
-// 针对 antchensw.cn 的自动点击脚本
 (function () {
-  console.log('🪳 Ruriko工具箱已加载，目标网站:', window.location.href);
 
   // 只针对目标网站执行
   if (!window.location.hostname.includes('antchensw.cn')) {
-    console.log('⚠️ 当前网站不是目标网站，工具箱停止执行');
+    console.info('⚠️ 当前网站不是目标网站，工具箱停止执行');
     return;
   }
-  const router = (document as any).getElementById('app').__vue_app__.config.globalProperties.$router
+  console.info('🪳杀手已加载');
+
+  // const router = (document as any).getElementById('app').__vue_app__.config.globalProperties.$router
+  const router = { push: (url) => { } }
+  router.push = (url) => {
+    console.info('📍 跳转页面:', url);
+    window.location.href = 'http://antchensw.cn' + url
+  }
+
   const fourMinGetBugList = () => {
     const now = new Date();
     const minutes = now.getMinutes();
@@ -303,19 +309,21 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     // 检查时间条件
     if (minutes % 4 === 0 && (seconds === 0 || seconds === 2 || seconds === 4)) {
-      console.log(`⏰ 时间条件满足 (分钟:${minutes}, 秒:${seconds})，执行重定向到朋友页面`);
+      console.info(`⏰ 时间条件满足 (分钟:${minutes}, 秒:${seconds})，执行重定向到朋友页面`);
       router.push('/friend?p=1&t=5&w=')
     } else {
-      console.log(`⏰ 时间条件不满足 (分钟:${minutes}, 秒:${seconds})，继续检查蟑螂选项`);
+      console.info(`⏰ 时间条件不满足 (分钟:${minutes}, 秒:${seconds})，继续检查蟑螂选项`);
     }
   }
   const AT = () => {
     setTimeout(() => {
+      console.info((document as any).getElementById('app').__vue_app__)
+      // .config.globalProperties.$router
       // 情况1: 匹配页面 - friend页面
       if (window.location.href.indexOf('http://antchensw.cn/friend?') !== -1) {
-        console.log('📍 当前在朋友列表页面，开始检查时间条件和蟑螂选项');
+        console.info('📍 当前在朋友列表页面，开始检查时间条件和蟑螂选项');
 
-        fourMinGetBugList()
+        fourMinGetBugList();
 
         // 查找蟑螂单选按钮
         const cockroachRadio: any = document.querySelector('input[type="radio"][value="蟑螂"]')
@@ -325,89 +333,83 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           });
 
         if (cockroachRadio) {
-          console.log('✅ 找到蟑螂选项:', cockroachRadio);
+          console.info('✅ 找到蟑螂选项:', cockroachRadio);
 
           if (cockroachRadio.checked) {
-            console.log('🪳 蟑螂选项已选中，查找bi-bug元素');
+            console.info('🪳 蟑螂选项已选中，查找bi-bug元素');
             const roundedPill: any = document.getElementsByClassName('bi-bug');
 
             if (roundedPill.length) {
-              console.log('🔍 找到bi-bug元素，准备跳转到:', roundedPill[0].parentElement.parentElement.href);
-              router.push(
-                roundedPill[0].parentElement.parentElement.href.replace('http://antchensw.cn', '')
-              )
-              // window.location.href = roundedPill[0].parentElement.parentElement.href;
+              // const indexVal = ~~(Math.random() * roundedPill.length)
+              const indexVal = 0
+              const url = roundedPill[indexVal].parentElement.parentElement.href.replace('http://antchensw.cn', '')
+              router.push(url);
             } else {
-              console.log('❌ 未找到bi-bug元素，无法跳转');
+              console.info('❌ 未找到bi-bug元素，无法跳转');
             }
           } else {
-            console.log('🪳 蟑螂选项未选中，正在执行自动点击');
-            // 执行点击
+            console.info('🪳 蟑螂选项未选中，正在执行自动点击');
             cockroachRadio.click();
-            // 额外触发 change 事件
             cockroachRadio.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('✅ 已自动切换到蟑螂选项');
-
-            // 验证当前选中的值
+            console.info('✅ 已自动切换到蟑螂选项');
             const selected: any = document.querySelector('input[type="radio"]:checked');
-            console.log('📊 当前选中的选项:', selected ? (selected.value || '通过文字匹配的选项') : '无');
+            console.info('📊 当前选中的选项:', selected ? (selected.value || '通过文字匹配的选项') : '无');
           }
         } else {
-          console.log('❌ 找不到蟑螂选项，请手动检查页面上的单选框内容');
-          console.log('📝 页面中所有单选框:', document.querySelectorAll('input[type="radio"]'));
+          console.info('❌ 找不到蟑螂选项，请手动检查页面上的单选框内容');
+          console.info('📝 页面中所有单选框:', document.querySelectorAll('input[type="radio"]'));
         }
-
       }
       // 情况2: 详情页面 - friend/info页面
       else if (window.location.href.indexOf('http://antchensw.cn/friend/info?') !== -1) {
-        console.log('📍 当前在朋友详情页面，开始处理bi-bug元素');
+        console.info('到达好友餐厅');
 
         const bug: any = document.getElementsByClassName('bi-bug');
-
         if (bug.length) {
-          console.log(`🔍 找到 ${bug.length} 个bi-bug元素，开始处理`);
-
+          console.info('🎉到达好友餐厅,发现蟑螂');
+          let bugNum = 0
+          let bugFloor = false
           for (let i = 0; i < bug.length; i++) {
-            console.log(`🔄 处理第 ${i + 1}/${bug.length} 个bi-bug元素`);
-
-            if (bug[i].parentElement.tagName === 'A') {
-              console.log(`📎 第${i + 1}个元素父级是链接标签`);
-
-              if (bug[i].parentElement.className.indexOf('dropdown-item') !== -1 && i === bug.length - 1) {
-                console.log('🎯 这是最后一个下拉菜单项，跳转到朋友列表页');
-                router.push('/friend?p=1&t=5&w=')
+            const tagName = bug[i].parentElement.tagName
+            const isMyBug = bug[i].className.indexOf('text-success') !== -1
+            if (tagName === 'SPAN') {
+              const haveBugFloor = bug[i].parentElement.parentElement
+              if (haveBugFloor.className.indexOf('active') === -1 && !bugFloor) {
+                console.info('当前未在有蟑螂的楼层,正在前往该楼层');
+                haveBugFloor.click();
+                AT()
+                return;
               } else {
-                console.log(`🖱️ 点击第${i + 1}个bi-bug的父级链接`);
-                bug[i].parentElement.click();
+                console.info('当前已在有蟑螂的楼层');
+                bugFloor = true
               }
-            } else {
-              // 切换到蟑螂楼层
-              const grandParent = bug[i].parentElement.parentElement;
-              console.log(`📁 检查第${i + 1}个元素的祖父元素:`, grandParent);
-
-              if (grandParent.className.indexOf('active') === -1) {
-                console.log('🖱️ 祖父元素未激活，执行点击');
-                grandParent.click();
-              } else {
-                console.log('✅ 祖父元素已激活，无需点击');
+            } else if (tagName === 'A' && !isMyBug) {
+              if (bug[i].parentElement.innerHTML.indexOf('bi-shield-exclamation') !== -1) {
+                console.info('🪳 发现蟑螂，正在点击');
+                bug[i].parentElement.click();
+                bugNum++
               }
             }
           }
+          if (bugNum === 0) {
+            console.info('🎯 没有蟑螂，跳转到朋友列表页');
+            router.push('/friend?p=1&t=5&w=');
+          }
         } else {
-          console.log('❌ 未找到bi-bug元素，跳转到朋友列表页');
-          router.push('/friend?p=1&t=5&w=')
+          console.info('❌ 未找到bi-bug元素，跳转到朋友列表页');
+          router.push('/friend?p=1&t=5&w=');
         }
       }
       // 情况3: 其他页面
       else {
-        console.log('📍 当前在其他页面，跳过处理');
+        console.info('📍 当前在其他页面，跳过处理');
       }
 
-      console.log('🔄 继续执行下一次循环检查');
+      console.info('🔄 继续执行下一次循环检查');
       AT();
     }, ~~(Math.random() * 100) + 1000);
   };
 
-  console.log('🚀 启动Ruriko工具箱循环检查');
+  console.info('🚀 启动Ruriko工具箱循环检查');
   AT();
 })();
