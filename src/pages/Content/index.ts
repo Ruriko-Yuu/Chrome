@@ -437,12 +437,69 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       }
     }
     else if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
+
       const daoList: any = document.getElementsByClassName('nav-item text-center')
       if (daoList.length) {
         if (daoList[4].innerHTML.indexOf('active') !== -1) {
+
+          console.log('获取天气，准备做特色菜')
+          // 解码 HTML 实体的函数
+          const decodeHtmlEntities = (str) => {
+            if (!str) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = str;
+            return textarea.value;
+          };
+
+          // 获取天气信息并解析效果
+          const getWeatherInfo = () => {
+            const weatherElement = document.getElementsByTagName('a')[1];
+            if (!weatherElement) {
+              console.info('❌ 未找到天气元素');
+              return null;
+            }
+
+            const rawTitle = weatherElement.getAttribute('data-bs-title');
+            if (!rawTitle) {
+              console.info('❌ 未找到 data-bs-title 属性');
+              return null;
+            }
+
+            // 解码 HTML 实体
+            const decodedTitle: any = decodeHtmlEntities(rawTitle);
+            console.info('📝 解码后的内容:', decodedTitle);
+
+            // 提取天气名称（从 h6 标签中）
+            const weatherMatch = decodedTitle.match(/<h6[^>]*>(.*?)<\/h6>/);
+            const weatherName = weatherMatch ? weatherMatch[1] : '未知天气';
+
+            // 提取所有效果（从 li 标签中）
+            const effectMatches = [...decodedTitle.matchAll(/<li>(.*?)<\/li>/g)];
+            const effects = effectMatches.map(m => {
+              // 去除 span 标签，保留纯文本
+              const text = m[1].replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '');
+              return text.trim();
+            }).filter(e => e.length > 0);
+
+            console.info(`🌤️ 当前天气: ${weatherName}`);
+            console.info(`📋 效果列表:`, effects);
+
+            return {
+              weatherName,
+              effects,
+              raw: rawTitle,
+              decoded: decodedTitle
+            };
+          };
+
+          // 调用示例
+          const weatherInfo = getWeatherInfo();
+          // 待做辣椒炒肉
+          console.log("🚀 ~ runMainLogic ~ weatherInfo:", weatherInfo)
         } else {
-          daoList[4].click()
+          daoList[4].childNodes[0].click()
         }
+      } else {
       }
     }
     // 情况x: 其他页面
