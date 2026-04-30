@@ -361,7 +361,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             const url = roundedPill[indexVal].parentElement.parentElement.href.replace('http://antchensw.cn', '');
             router.push(url);
           } else {
-            console.info('❌ 未找到bi-bug元素，无法跳转');
+            console.info('❌ 未找到bi-bug元素，无法跳转, 去看看还有没有菜');
+            router.push('/rest');
           }
         } else {
           console.info('🪳 蟑螂选项未选中，正在执行自动点击');
@@ -421,7 +422,30 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         }
       }
     }
-    // 情况3: 其他页面
+    // 情况3: 首页
+    else if (window.location.href === 'http://antchensw.cn/rest') {
+      const floatEndList = document.getElementsByClassName('float-end')
+      let foodNot = false
+      for (let index = 0; index < floatEndList.length; index++) {
+        const element = floatEndList[index];
+        if (element.innerHTML.indexOf('去烹制') !== -1) {
+          foodNot = true
+        }
+      }
+      if (foodNot) {
+        router.push('/rest/cookbooks?cook=2')
+      }
+    }
+    else if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
+      const daoList: any = document.getElementsByClassName('nav-item text-center')
+      if (daoList.length) {
+        if (daoList[4].innerHTML.indexOf('active') !== -1) {
+        } else {
+          daoList[4].click()
+        }
+      }
+    }
+    // 情况x: 其他页面
     else {
       console.info('📍 当前在其他页面，跳过处理');
     }
