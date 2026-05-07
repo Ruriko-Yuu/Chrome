@@ -296,18 +296,20 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.info('🪳杀手已加载');
 
   // 从 localStorage 读取上次的状态，默认为 false（关闭）
-  const getStoredEnabled = () => {
-    const stored = localStorage.getItem('ruriko-killer-enabled');
-    return stored === 'true'; // 只有明确为 'true' 才返回 true，否则 false
+  const getStoredEnabled = (key, defaultValue = false) => {
+    const stored = localStorage.getItem(key);
+    return stored === 'true' ? true : (stored === 'false' ? false : defaultValue);
   };
 
   // 保存状态到 localStorage
-  const saveEnabled = (value) => {
-    localStorage.setItem('ruriko-killer-enabled', value);
+  const saveEnabled = (key, value) => {
+    localStorage.setItem(key, value);
   };
 
   // 全局控制标志 - 从存储中读取
-  let isEnabled = getStoredEnabled();
+  let isBugKillerEnabled = getStoredEnabled('ruriko-bug-killer-enabled', false);
+  let isSpecialDishEnabled = getStoredEnabled('ruriko-special-dish-enabled', false);
+  let isPanelCollapsed = getStoredEnabled('ruriko-panel-collapsed', true); // 默认收缩
   let timeoutId = null;
 
   // 路由器模拟/覆盖
@@ -319,6 +321,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
   // 四分钟抓取逻辑
   const fourMinGetBugList = () => {
+    if (!isBugKillerEnabled) return;
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
@@ -330,10 +333,71 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
   };
 
+  // 特色菜制作逻辑
+  const handleSpecialDish = () => {
+    if (!isSpecialDishEnabled) return false;
+
+    if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
+      const daoList: any = document.getElementsByClassName('nav-item text-center');
+      const daoIndex = 1;
+      if (daoList.length) {
+        if (daoList[daoIndex].innerHTML.indexOf('active') !== -1) {
+          const decodeHtmlEntities = (str) => {
+            if (!str) return '';
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = str;
+            return textarea.value;
+          };
+
+          const getWeatherInfo = () => {
+            const weatherElement = document.getElementsByTagName('a')[1];
+            if (!weatherElement) return null;
+            const rawTitle = weatherElement.getAttribute('data-bs-title');
+            if (!rawTitle) return null;
+            const decodedTitle = decodeHtmlEntities(rawTitle);
+            const weatherMatch = decodedTitle.match(/<h6[^>]*>(.*?)<\/h6>/);
+            const weatherName = weatherMatch ? weatherMatch[1] : '未知天气';
+            return { weatherName };
+          };
+
+          const weatherInfo = getWeatherInfo();
+          if (!weatherInfo) return false;
+
+          console.log("获取天气，准备做特色菜，当前天气：", weatherInfo.weatherName);
+          const fieldset: any = document.getElementsByTagName('fieldset')
+          const notHaveC = fieldset[0]?.childNodes[0]?.innerHTML?.indexOf('请在下方选择要烹制的特色菜') !== -1;
+
+          if (notHaveC) {
+            let caiIndex = 0;
+            (document.getElementById('mysteriousCookbooksContent') as any)?.childNodes[caiIndex]?.childNodes[1]?.childNodes[2]?.click();
+          } else {
+            if (fieldset[0]?.childNodes[3]?.innerHTML && fieldset[0]?.childNodes[3]?.innerHTML?.indexOf('剩余份数') !== -1) {
+              console.log('还有剩余特色菜');
+            } else {
+              if (weatherInfo.weatherName.indexOf('雾') !== -1) {
+                fieldset[0]?.childNodes[0]?.childNodes[3]?.childNodes[1]?.childNodes[0]?.click();
+              }
+              setTimeout(() => {
+                fieldset[0]?.childNodes[0]?.childNodes[4]?.childNodes[1]?.click();
+              }, 200);
+            }
+          }
+          return true;
+        } else {
+          daoList[daoIndex].childNodes[0].click();
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   // 主要逻辑
   const runMainLogic = () => {
-    if (!isEnabled) {
-      // 关闭状态，不执行任何操作
+    // 特色菜逻辑（独立于打蟑螂开关）
+    handleSpecialDish();
+
+    if (!isBugKillerEnabled) {
       return;
     }
 
@@ -342,8 +406,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (window.location.href.indexOf('http://antchensw.cn/friend?') !== -1) {
       console.info('📍 当前在朋友列表页面，开始检查时间条件和蟑螂选项');
 
-
-      // 查找蟑螂单选按钮
       const cockroachRadio: any = document.querySelector('input[type="radio"][value="蟑螂"]')
         || Array.from(document.querySelectorAll('input[type="radio"]')).find(radio => {
           const label: any = document.querySelector(`label[for="${radio.id}"]`);
@@ -370,12 +432,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           cockroachRadio.click();
           cockroachRadio.dispatchEvent(new Event('change', { bubbles: true }));
           console.info('✅ 已自动切换到蟑螂选项');
-          const selected: any = document.querySelector('input[type="radio"]:checked');
-          console.info('📊 当前选中的选项:', selected ? (selected.value || '通过文字匹配的选项') : '无');
         }
-      } else {
-        console.info('❌ 找不到蟑螂选项，请手动检查页面上的单选框内容');
-        console.info('📝 页面中所有单选框:', document.querySelectorAll('input[type="radio"]'));
       }
     }
     // 情况2: 详情页面 - friend/info页面
@@ -396,7 +453,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             if (haveBugFloor.className.indexOf('active') === -1 && !bugFloor) {
               console.info('当前未在有蟑螂的楼层,正在前往该楼层');
               haveBugFloor.click();
-              // 不递归调用，等待下一次循环
               return;
             } else {
               console.info('当前已在有蟑螂的楼层');
@@ -413,7 +469,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                   console.info('🎯蟑螂已被打，跳转到朋友列表页');
                   router.push('/friend?p=1&t=5&w=');
                 }
-              }, 50)
+              }, 50);
               bug[i].parentElement.click();
               bugNum++;
             }
@@ -435,139 +491,76 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
     // 情况3: 首页
     else if (window.location.href === 'http://antchensw.cn/rest') {
-      const floatEndList = document.getElementsByClassName('float-end')
-      let foodNot = false
+      const floatEndList = document.getElementsByClassName('float-end');
+      let foodNot = false;
       for (let index = 0; index < floatEndList.length; index++) {
         const element = floatEndList[index];
         if (element.innerHTML.indexOf('去烹制') !== -1) {
-          foodNot = true
+          foodNot = true;
         }
       }
       if (foodNot) {
-        router.push('/rest/cookbooks?cook=2')
+        router.push('/rest/cookbooks?cook=2');
       }
-    }
-    else if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
-
-      const daoList: any = document.getElementsByClassName('nav-item text-center')
-      // 0: 一道 1: 二道 2: 三道 3: 四道 4: 五道 5:六道
-      const daoIndex = 4
-      if (daoList.length) {
-        if (daoList[daoIndex].innerHTML.indexOf('active') !== -1) {
-          // 解码 HTML 实体的函数
-          const decodeHtmlEntities = (str) => {
-            if (!str) return '';
-            const textarea = document.createElement('textarea');
-            textarea.innerHTML = str;
-            return textarea.value;
-          };
-
-          // 获取天气信息并解析效果
-          const getWeatherInfo = () => {
-            const weatherElement = document.getElementsByTagName('a')[1];
-            if (!weatherElement) {
-              console.info('❌ 未找到天气元素');
-              return null;
-            }
-
-            const rawTitle = weatherElement.getAttribute('data-bs-title');
-            if (!rawTitle) {
-              console.info('❌ 未找到 data-bs-title 属性');
-              return null;
-            }
-
-            // 解码 HTML 实体
-            const decodedTitle: any = decodeHtmlEntities(rawTitle);
-            console.info('📝 解码后的内容:', decodedTitle);
-
-            // 提取天气名称（从 h6 标签中）
-            const weatherMatch = decodedTitle.match(/<h6[^>]*>(.*?)<\/h6>/);
-            const weatherName = weatherMatch ? weatherMatch[1] : '未知天气';
-
-            // 提取所有效果（从 li 标签中）
-            const effectMatches = [...decodedTitle.matchAll(/<li>(.*?)<\/li>/g)];
-            const effects = effectMatches.map(m => {
-              // 去除 span 标签，保留纯文本
-              const text = m[1].replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '');
-              return text.trim();
-            }).filter(e => e.length > 0);
-
-            console.info(`🌤️ 当前天气: ${weatherName}`);
-            console.info(`📋 效果列表:`, effects);
-
-            return {
-              weatherName,
-              effects,
-              raw: rawTitle,
-              decoded: decodedTitle
-            };
-          };
-
-          // 调用示例
-          const weatherInfo = getWeatherInfo();
-          // 待做辣椒炒肉
-          console.log("获取天气，准备做特色菜，当前天气：", weatherInfo.weatherName)
-          const notHaveC = (document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[0]?.innerHTML?.indexOf('请在下方选择要烹制的特色菜') !== -1
-          if (notHaveC) {
-            let caiIndex = 0; // 默认做熟练度最高的第一个菜
-            (document.getElementById('mysteriousCookbooksContent') as any)?.childNodes?.[caiIndex]?.childNodes?.[1]?.childNodes?.[2]?.click()
-          } else {
-            if ((document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[3]?.innerHTML?.indexOf('剩余份数') !== -1) {
-              console.log('还有剩余特色菜')
-            } else {
-              if (weatherInfo.weatherName.indexOf('雾') !== -1) {
-                // 是雾就选择做五份
-                (document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[0]?.childNodes?.[3]?.childNodes?.[1]?.childNodes?.[0]?.click()
-              }
-              setTimeout(() => {
-                // 延迟制作
-                (document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[0]?.childNodes?.[4]?.childNodes?.[1]?.click()
-              }, 200)
-            }
-          }
-        } else {
-          daoList[daoIndex].childNodes[0].click()
-        }
-      } else {
-      }
-    }
-    // 情况x: 其他页面
-    else {
-      console.info('📍 当前在其他页面，跳过处理');
     }
   };
 
   // 循环执行
   const loop = () => {
     runMainLogic();
-    if (isEnabled) {
-      console.info('🔄 工具箱运行中，继续下一次循环检查');
-    }
     timeoutId = setTimeout(loop, ~~(Math.random() * 100) + 1000);
   };
 
-  // 更新控制面板UI（如果存在）
+  // 更新控制面板UI
   const updatePanelUI = () => {
-    const statusText = document.getElementById('ruriko-status');
-    const toggleBtn = document.getElementById('ruriko-toggle');
-    if (!statusText || !toggleBtn) return;
+    const bugStatusText = document.getElementById('ruriko-bug-status');
+    const bugToggleBtn = document.getElementById('ruriko-bug-toggle');
+    const dishStatusText = document.getElementById('ruriko-dish-status');
+    const dishToggleBtn = document.getElementById('ruriko-dish-toggle');
+    const collapseBtn = document.getElementById('ruriko-collapse-btn');
+    const panelContent = document.getElementById('ruriko-panel-content');
 
-    if (isEnabled) {
-      statusText.innerText = '● 运行中';
-      statusText.style.color = '#6bff6b';
-      toggleBtn.innerText = '关闭';
-      toggleBtn.style.background = '#6b6bff';
-    } else {
-      statusText.innerText = '● 已关闭';
-      statusText.style.color = '#ff6b6b';
-      toggleBtn.innerText = '开启';
-      toggleBtn.style.background = '#ff6b6b';
+    if (bugStatusText && bugToggleBtn) {
+      if (isBugKillerEnabled) {
+        bugStatusText.innerText = '🐛 开启';
+        bugStatusText.style.color = '#6bff6b';
+        bugToggleBtn.innerText = '关闭';
+        bugToggleBtn.style.background = '#6b6bff';
+      } else {
+        bugStatusText.innerText = '🐛 关闭';
+        bugStatusText.style.color = '#ff6b6b';
+        bugToggleBtn.innerText = '开启';
+        bugToggleBtn.style.background = '#ff6b6b';
+      }
+    }
+
+    if (dishStatusText && dishToggleBtn) {
+      if (isSpecialDishEnabled) {
+        dishStatusText.innerText = '🍳 开启';
+        dishStatusText.style.color = '#6bff6b';
+        dishToggleBtn.innerText = '关闭';
+        dishToggleBtn.style.background = '#6b6bff';
+      } else {
+        dishStatusText.innerText = '🍳 关闭';
+        dishStatusText.style.color = '#ff6b6b';
+        dishToggleBtn.innerText = '开启';
+        dishToggleBtn.style.background = '#ff6b6b';
+      }
+    }
+
+    if (panelContent && collapseBtn) {
+      if (isPanelCollapsed) {
+        panelContent.style.display = 'none';
+        collapseBtn.innerHTML = '▶';
+      } else {
+        panelContent.style.display = 'flex';
+        collapseBtn.innerHTML = '▼';
+      }
     }
   };
 
   // 创建控制面板UI
   const createControlPanel = () => {
-    // 检查是否已存在面板
     if (document.getElementById('ruriko-control-panel')) {
       updatePanelUI();
       return;
@@ -582,71 +575,157 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       z-index: 99999;
       background: #1e1e2f;
       border-radius: 12px;
-      padding: 12px 16px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       font-family: system-ui, -apple-system, 'Segoe UI', monospace;
-      font-size: 14px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
+      font-size: 13px;
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255,255,255,0.2);
+      min-width: 180px;
     `;
 
-    const statusText = document.createElement('span');
-    statusText.id = 'ruriko-status';
-    statusText.style.cssText = `
-      color: #ff6b6b;
+    const headerDiv = document.createElement('div');
+    headerDiv.style.cssText = `
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      user-select: none;
+    `;
+
+    const titleSpan = document.createElement('span');
+    titleSpan.innerText = '🎮 工具箱';
+    titleSpan.style.cssText = `
+      color: white;
       font-weight: bold;
-      letter-spacing: 1px;
+      font-size: 12px;
     `;
 
-    const toggleBtn = document.createElement('button');
-    toggleBtn.id = 'ruriko-toggle';
-    toggleBtn.style.cssText = `
+    const collapseBtn = document.createElement('button');
+    collapseBtn.id = 'ruriko-collapse-btn';
+    collapseBtn.innerHTML = '▼';
+    collapseBtn.style.cssText = `
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0 4px;
+      transition: transform 0.2s;
+    `;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.id = 'ruriko-panel-content';
+    contentDiv.style.cssText = `
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    `;
+
+    // 打蟑螂开关行
+    const bugRow = document.createElement('div');
+    bugRow.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    `;
+    const bugStatus = document.createElement('span');
+    bugStatus.id = 'ruriko-bug-status';
+    bugStatus.style.cssText = `font-weight: bold;`;
+    const bugToggle = document.createElement('button');
+    bugToggle.id = 'ruriko-bug-toggle';
+    bugToggle.style.cssText = `
       background: #ff6b6b;
       border: none;
       color: white;
-      padding: 6px 16px;
+      padding: 4px 16px;
       border-radius: 20px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 13px;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      font-size: 12px;
     `;
-    toggleBtn.onmouseenter = () => {
-      toggleBtn.style.transform = 'scale(1.02)';
-    };
-    toggleBtn.onmouseleave = () => {
-      toggleBtn.style.transform = 'scale(1)';
-    };
 
-    toggleBtn.onclick = () => {
-      isEnabled = !isEnabled;
-      saveEnabled(isEnabled);  // 保存到 localStorage
-      updatePanelUI();
-      if (isEnabled) {
-        console.info('🚀 工具箱已开启，开始自动执行');
-      } else {
-        console.info('⏸️ 工具箱已关闭，停止自动执行');
-      }
-    };
+    // 特色菜开关行
+    const dishRow = document.createElement('div');
+    dishRow.style.cssText = `
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    `;
+    const dishStatus = document.createElement('span');
+    dishStatus.id = 'ruriko-dish-status';
+    dishStatus.style.cssText = `font-weight: bold;`;
+    const dishToggle = document.createElement('button');
+    dishToggle.id = 'ruriko-dish-toggle';
+    dishToggle.style.cssText = `
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      padding: 4px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+    `;
 
-    panel.appendChild(statusText);
-    panel.appendChild(toggleBtn);
+    bugRow.appendChild(bugStatus);
+    bugRow.appendChild(bugToggle);
+    dishRow.appendChild(dishStatus);
+    dishRow.appendChild(dishToggle);
+    contentDiv.appendChild(bugRow);
+    contentDiv.appendChild(dishRow);
+
+    headerDiv.appendChild(titleSpan);
+    headerDiv.appendChild(collapseBtn);
+    panel.appendChild(headerDiv);
+    panel.appendChild(contentDiv);
     document.body.appendChild(panel);
 
-    // 设置初始UI状态
+    // 事件绑定
+    headerDiv.onclick = (e) => {
+      if (e.target !== collapseBtn && e.target !== headerDiv) return;
+      isPanelCollapsed = !isPanelCollapsed;
+      saveEnabled('ruriko-panel-collapsed', isPanelCollapsed);
+      updatePanelUI();
+    };
+
+    bugToggle.onclick = (e) => {
+      e.stopPropagation();
+      isBugKillerEnabled = !isBugKillerEnabled;
+      saveEnabled('ruriko-bug-killer-enabled', isBugKillerEnabled);
+      updatePanelUI();
+      console.info(isBugKillerEnabled ? '🚀 打蟑螂已开启' : '⏸️ 打蟑螂已关闭');
+    };
+
+    dishToggle.onclick = (e) => {
+      e.stopPropagation();
+      isSpecialDishEnabled = !isSpecialDishEnabled;
+      saveEnabled('ruriko-special-dish-enabled', isSpecialDishEnabled);
+      updatePanelUI();
+      console.info(isSpecialDishEnabled ? '🍳 自动特色菜已开启' : '🍳 自动特色菜已关闭');
+    };
+
+    // 鼠标悬浮效果
+    [bugToggle, dishToggle].forEach(btn => {
+      btn.onmouseenter = () => { btn.style.transform = 'scale(1.02)'; };
+      btn.onmouseleave = () => { btn.style.transform = 'scale(1)'; };
+    });
+
     updatePanelUI();
   };
 
-  // 启动循环（即使关闭状态也会运行loop，但runMainLogic会被isEnabled拦截）
+  // 启动
   const start = () => {
     createControlPanel();
     loop();
-    const statusMsg = isEnabled ? '开启' : '关闭';
-    console.info(`🎮 控制面板已添加，当前状态：${statusMsg}（状态已持久化，刷新/切页后保持）`);
+    console.info(`🎮 控制面板已添加`);
+    console.info(`🐛 打蟑螂状态：${isBugKillerEnabled ? '开启' : '关闭'}`);
+    console.info(`🍳 自动特色菜状态：${isSpecialDishEnabled ? '开启' : '关闭'}`);
+    console.info(`📁 面板默认收缩，点击标题栏可展开/收起`);
   };
 
   start();
