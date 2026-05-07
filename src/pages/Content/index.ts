@@ -339,7 +339,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
       const daoList: any = document.getElementsByClassName('nav-item text-center');
-      const daoIndex = 1;
+      const daoIndex = 4;
       if (daoList.length) {
         if (daoList[daoIndex].innerHTML.indexOf('active') !== -1) {
           const decodeHtmlEntities = (str) => {
