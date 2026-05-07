@@ -11,6 +11,9 @@ const ASSET_PATH = process.env.ASSET_PATH || '/';
 
 var alias = {
   'react-dom': '@hot-loader/react-dom',
+  // 添加这两行来解决 jsx-runtime 解析问题
+  'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+  'react/jsx-dev-runtime': require.resolve('react/jsx-dev-runtime'),
 };
 
 // load the secrets
@@ -93,25 +96,26 @@ var options = {
           },
         ],
       },
-      // {
-      //   test: /\.svg$/,
-      //   use: ['svg-inline-loader'],
-      // },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
         type: 'asset/resource',
         exclude: /node_modules/,
-        // loader: 'file-loader',
-        // options: {
-        //   name: '[name].[ext]',
-        // },
       },
       {
         test: /\.html$/,
         loader: 'html-loader',
         exclude: /node_modules/,
       },
-      { test: /\.(ts|tsx)$/, loader: 'ts-loader', exclude: /node_modules/ },
+      {
+        test: /\.(ts|tsx)$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+        options: {
+          compilerOptions: {
+            jsx: 'react-jsx' // 确保使用新的 JSX 转换
+          }
+        }
+      },
       {
         test: /\.(js|jsx)$/,
         use: [
@@ -120,9 +124,22 @@ var options = {
           },
           {
             loader: 'babel-loader',
+            options: {
+              presets: [
+                '@babel/preset-env',
+                ['@babel/preset-react', { runtime: 'automatic' }] // 添加这个配置
+              ]
+            }
           },
         ],
         exclude: /node_modules/,
+      },
+      // 添加这个规则来处理 node_modules 中的 ESM 模块
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
       },
     ],
   },
@@ -131,6 +148,11 @@ var options = {
     extensions: fileExtensions
       .map((extension) => '.' + extension)
       .concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
+    // 添加这个配置来帮助解析
+    fallback: {
+      "react/jsx-runtime": require.resolve("react/jsx-runtime"),
+      "react/jsx-dev-runtime": require.resolve("react/jsx-dev-runtime"),
+    },
   },
   plugins: [
     new CleanWebpackPlugin({ verbose: false }),
