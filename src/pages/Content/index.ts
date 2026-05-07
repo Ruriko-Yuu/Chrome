@@ -287,6 +287,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 })();
 
 (function () {
+  let bugTimer = null
   // 只针对目标网站执行
   if (!window.location.hostname.includes('antchensw.cn')) {
     console.info('⚠️ 当前网站不是目标网站，工具箱停止执行');
@@ -321,7 +322,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
-    if (minutes % 4 === 0 && (seconds === 0 || seconds === 2 || seconds === 4)) {
+    if (minutes % 4 === 1 && (seconds === 2 || seconds === 5 || seconds === 7)) {
       console.info(`⏰ 时间条件满足 (分钟:${minutes}, 秒:${seconds})，执行重定向到朋友页面`);
       router.push('/friend?p=1&t=5&w=');
     } else {
@@ -336,11 +337,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       return;
     }
 
+    fourMinGetBugList();
     // 情况1: 匹配页面 - friend页面
     if (window.location.href.indexOf('http://antchensw.cn/friend?') !== -1) {
       console.info('📍 当前在朋友列表页面，开始检查时间条件和蟑螂选项');
 
-      fourMinGetBugList();
 
       // 查找蟑螂单选按钮
       const cockroachRadio: any = document.querySelector('input[type="radio"][value="蟑螂"]')
@@ -386,6 +387,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         console.info('🎉到达好友餐厅,发现蟑螂');
         let bugNum = 0;
         let bugFloor = false;
+
         for (let i = 0; i < bug.length; i++) {
           const tagName = bug[i].parentElement.tagName;
           const isMyBug = bug[i].className.indexOf('text-success') !== -1;
@@ -403,6 +405,15 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           } else if (tagName === 'A' && !isMyBug) {
             if (bug[i].parentElement.innerHTML.indexOf('bi-shield-exclamation') !== -1) {
               console.info('🪳 发现蟑螂，正在点击');
+              if (bugTimer) {
+                clearInterval(bugTimer);
+              }
+              bugTimer = setInterval(() => {
+                if (document.body.innerHTML.indexOf('该桌') !== -1) {
+                  console.info('🎯蟑螂已被打，跳转到朋友列表页');
+                  router.push('/friend?p=1&t=5&w=');
+                }
+              }, 50)
               bug[i].parentElement.click();
               bugNum++;
             }
@@ -439,10 +450,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     else if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
 
       const daoList: any = document.getElementsByClassName('nav-item text-center')
+      // 0: 一道 1: 二道 2: 三道 3: 四道 4: 五道 5:六道
+      const daoIndex = 4
       if (daoList.length) {
-        if (daoList[4].innerHTML.indexOf('active') !== -1) {
-
-          console.log('获取天气，准备做特色菜')
+        if (daoList[daoIndex].innerHTML.indexOf('active') !== -1) {
           // 解码 HTML 实体的函数
           const decodeHtmlEntities = (str) => {
             if (!str) return '';
@@ -495,9 +506,27 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           // 调用示例
           const weatherInfo = getWeatherInfo();
           // 待做辣椒炒肉
-          console.log("🚀 ~ runMainLogic ~ weatherInfo:", weatherInfo)
+          console.log("获取天气，准备做特色菜，当前天气：", weatherInfo.weatherName)
+          const notHaveC = (document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[0]?.innerHTML?.indexOf('请在下方选择要烹制的特色菜') !== -1
+          if (notHaveC) {
+            let caiIndex = 0; // 默认做熟练度最高的第一个菜
+            (document.getElementById('mysteriousCookbooksContent') as any)?.childNodes?.[caiIndex]?.childNodes?.[1]?.childNodes?.[2]?.click()
+          } else {
+            if ((document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[3]?.innerHTML?.indexOf('剩余份数') !== -1) {
+              console.log('还有剩余特色菜')
+            } else {
+              if (weatherInfo.weatherName.indexOf('雾') !== -1) {
+                // 是雾就选择做五份
+                (document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[0]?.childNodes?.[3]?.childNodes?.[1]?.childNodes?.[0]?.click()
+              }
+              setTimeout(() => {
+                // 延迟制作
+                (document.getElementsByTagName('fieldset') as any)?.[0]?.childNodes?.[0]?.childNodes?.[4]?.childNodes?.[1]?.click()
+              }, 200)
+            }
+          }
         } else {
-          daoList[4].childNodes[0].click()
+          daoList[daoIndex].childNodes[0].click()
         }
       } else {
       }
