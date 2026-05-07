@@ -337,7 +337,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   const handleSpecialDish = () => {
     if (!isSpecialDishEnabled) return false;
 
-    if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
+    if (window.location.href === 'http://antchensw.cn/rest') {
+      if (document.getElementById('oilnumA')) {
+        document.getElementById('oilnumA')?.click()
+        const floatEndList = document.getElementsByClassName('float-end');
+        let foodNot = false;
+        for (let index = 0; index < floatEndList.length; index++) {
+          const element = floatEndList[index];
+          if (element.innerHTML.indexOf('去烹制') !== -1) {
+            foodNot = true;
+          }
+        }
+        if (foodNot) {
+          router.push('/rest/cookbooks?cook=2');
+        }
+      }
+    }
+    else if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
       const daoList: any = document.getElementsByClassName('nav-item text-center');
       const daoIndex = 4;
       if (daoList.length) {
@@ -487,20 +503,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         if (floor.length) {
           router.push('/friend?p=1&t=5&w=');
         }
-      }
-    }
-    // 情况3: 首页
-    else if (window.location.href === 'http://antchensw.cn/rest') {
-      const floatEndList = document.getElementsByClassName('float-end');
-      let foodNot = false;
-      for (let index = 0; index < floatEndList.length; index++) {
-        const element = floatEndList[index];
-        if (element.innerHTML.indexOf('去烹制') !== -1) {
-          foodNot = true;
-        }
-      }
-      if (foodNot) {
-        router.push('/rest/cookbooks?cook=2');
       }
     }
   };
