@@ -321,15 +321,18 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
   // 四分钟抓取逻辑
   const fourMinGetBugList = () => {
-    if (!isBugKillerEnabled) return;
+    if (!isBugKillerEnabled && !isSpecialDishEnabled) return;
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
-    if (minutes % 4 === 1 && (seconds === 2 || seconds === 5 || seconds === 7)) {
+    if (minutes % 4 === 1 && (seconds === ~~(minutes / 3))) {
       console.info(`⏰ 时间条件满足 (分钟:${minutes}, 秒:${seconds})，执行重定向到朋友页面`);
       router.push('/friend?p=1&t=5&w=');
+    } if (minutes % 4 === 0 && (seconds === 0)) {
+      console.info(`⏰ 时间条件满足 (分钟:${minutes}, 秒:${seconds})，执行重定向到主页`);
+      router.push('/rest');
     } else {
-      console.info(`⏰ 时间条件不满足 (分钟:${minutes}, 秒:${seconds})，继续检查蟑螂选项`);
+      console.info(`⏰ 时间条件不满足 (分钟:${minutes}, 秒:${seconds})`);
     }
   };
 
@@ -339,18 +342,25 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
     if (window.location.href === 'http://antchensw.cn/rest') {
       if (document.getElementById('oilnumA')) {
-        document.getElementById('oilnumA')?.click()
-        const floatEndList = document.getElementsByClassName('float-end');
-        let foodNot = false;
-        for (let index = 0; index < floatEndList.length; index++) {
-          const element = floatEndList[index];
-          if (element.innerHTML.indexOf('去烹制') !== -1) {
-            foodNot = true;
+        const oilnumA: any = document.getElementById('oilnumA')
+        const oilnum = oilnumA.parentElement.parentElement.childNodes[2].innerText
+        const [oilnum1, oilnum2] = oilnum.split('/')
+        if (Number(oilnum1) < Number(oilnum2)) {
+          document.getElementById('oilnumA')?.click()
+        }
+        setTimeout(() => {
+          const floatEndList = document.getElementsByClassName('float-end');
+          let foodNot = false;
+          for (let index = 0; index < floatEndList.length; index++) {
+            const element = floatEndList[index];
+            if (element.innerHTML.indexOf('去烹制') !== -1) {
+              foodNot = true;
+            }
           }
-        }
-        if (foodNot) {
-          router.push('/rest/cookbooks?cook=2');
-        }
+          if (foodNot) {
+            router.push('/rest/cookbooks?cook=2');
+          }
+        }, 3e3)
       }
     }
     else if (window.location.href.indexOf('/rest/cookbooks?cook=2') !== -1) {
