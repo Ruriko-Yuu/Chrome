@@ -257,7 +257,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   const countDown = () => {
     requestAnimationFrame(countDown)
     const now = new Date()
-    const remainder = ~~((new Date(`${now.getFullYear()} ${now.getMonth() + 1} ${now.getDate()} 17:30`).getTime() - new Date().getTime()) / 1000)
+    const remainder = ~~((new Date(`${now.getFullYear()} ${now.getMonth() + 1} ${now.getDate()} 17:00`).getTime() - new Date().getTime()) / 1000)
     if (document.getElementById('remainder')) {
       if (document.getElementById('remainder')!.innerHTML !== `${remainder}`) {
         document.getElementById('remainder')!.innerHTML = `${remainder}`
