@@ -36,7 +36,7 @@ const Popup = () => {
   };
   /** 切换是否是开发者 */ const changeIsDeveloper = (checked: boolean) => {
     setIsDeveloper(checked);
-    chrome.storage.sync.set({ isDeveloper: checked }, () => {});
+    chrome.storage.sync.set({ isDeveloper: checked }, () => { });
     let obj: any = {};
     chrome.storage.sync.get({ show_layout: {}, show_xmlConsole: {} }, (v) => {
       if (domain) {
@@ -58,7 +58,7 @@ const Popup = () => {
           );
         }
         domain && (v.show_layout[domain] = checked ? 1 : 0);
-        chrome.storage.sync.set({ show_layout: v.show_layout }, () => {});
+        chrome.storage.sync.set({ show_layout: v.show_layout }, () => { });
         if (!checked) {
           setShowXmlConsole(false);
           obj = {};
@@ -83,7 +83,7 @@ const Popup = () => {
           domain && (v.show_xmlConsole[domain] = 0);
           chrome.storage.sync.set(
             { show_xmlConsole: v.show_xmlConsole },
-            () => {}
+            () => { }
           );
         }
       }
@@ -166,7 +166,7 @@ const Popup = () => {
       <div className="app-body">
         <Collapse
           title={
-            <div className="flex-lc">
+            <div className="flex-lc gap-10">
               <span>开发者模式</span>
               <Switch checked={isDeveloper} onChange={changeIsDeveloper} />
             </div>
@@ -174,11 +174,11 @@ const Popup = () => {
           content={
             isDeveloper && (
               <div className="developer-area">
-                <div className="flex-lc">
+                <div className="domain-line flex-lc gap-10">
                   <span>显示布局</span>
                   <Switch checked={showLayout} onClick={changeShowLayout} />
                 </div>
-                <div className="flex-lc">
+                <div className="domain-line flex-lc gap-10">
                   <span>XML请求输出</span>
                   <Switch
                     checked={showXmlConsole}

@@ -19,6 +19,7 @@ export const Collapse: FC<{
       <div className="collapse-header flex-c-sb">
         <div>{title}</div>
         <div
+          className="collapse-header-right"
           onClick={() => {
             setCollapseContentHeight(
               collapseStatus ? 0 : collapseContentRef.current.clientHeight
@@ -26,7 +27,7 @@ export const Collapse: FC<{
             setCollapseStatus(!collapseStatus);
           }}
         >
-          {collapseStatus ? '😑' : '😝'}
+          {collapseStatus ? '🔺' : '🔻'}
         </div>
       </div>
       <div

@@ -1,2 +1,237 @@
-.perpetual-calendar-calendar {
+.perpetual-calendar-complex {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+
+  // 滚动条样式
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+
+    &:hover {
+      background: #999;
+    }
+  }
+
+  // 信息卡片基础样式
+  .info-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    // 卡片头部
+    .card-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      cursor: pointer;
+
+      .icon {
+        font-size: 20px;
+        margin-right: 8px;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+    }
+
+    // 卡片内容
+    .card-content {
+      padding: 16px;
+
+      // 信息行
+      .info-row {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        line-height: 1.6;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .label {
+          flex-shrink: 0;
+          min-width: 80px;
+          font-weight: 600;
+          color: #555;
+          font-size: 14px;
+        }
+
+        .value {
+          flex: 1;
+          color: #333;
+          font-size: 14px;
+
+          &.animal {
+            color: #e74c3c;
+            font-weight: 600;
+            font-size: 16px;
+          }
+
+          &.bazi {
+            color: #2c3e50;
+            font-weight: 500;
+            letter-spacing: 2px;
+          }
+
+          &.wuxing {
+            color: #27ae60;
+            font-weight: 500;
+          }
+        }
+
+        &.pengzu {
+          .value {
+            color: #8e44ad;
+            font-style: italic;
+          }
+        }
+
+        &.location {
+          .value {
+            color: #3498db;
+            font-family: monospace;
+          }
+        }
+      }
+
+      // 分区展示
+      .info-section {
+        margin-bottom: 16px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .section-title {
+          margin-bottom: 8px;
+
+          .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+
+            &.good {
+              background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            }
+
+            &.bad {
+              background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            }
+          }
+        }
+
+        .section-content {
+          margin: 0;
+          padding: 12px;
+          background: rgba(255, 255, 255, 0.7);
+          border-radius: 8px;
+          font-size: 14px;
+          line-height: 1.8;
+          color: #444;
+          border-left: 3px solid #667eea;
+        }
+      }
+
+      // 宜忌特殊样式
+      &.yiji-card,
+      &.shensha-card {
+        .info-section.yi,
+        .info-section:first-child {
+          .section-content {
+            border-left-color: #56ab2f;
+            background: linear-gradient(to right, rgba(86, 171, 47, 0.05), transparent);
+          }
+        }
+
+        .info-section.ji,
+        .info-section:last-child {
+          .section-content {
+            border-left-color: #eb3349;
+            background: linear-gradient(to right, rgba(235, 51, 73, 0.05), transparent);
+          }
+        }
+      }
+    }
+
+    // 可折叠卡片
+    &.collapsible {
+      summary {
+        list-style: none;
+
+        &::-webkit-details-marker {
+          display: none;
+        }
+
+        &::after {
+          content: '▼';
+          margin-left: auto;
+          transition: transform 0.3s;
+        }
+      }
+
+      &[open] summary::after {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  // 响应式设计
+  @media screen and (max-width: 768px) {
+    padding: 12px;
+
+    .info-card {
+      .card-header {
+        padding: 10px 12px;
+
+        h3 {
+          font-size: 14px;
+        }
+      }
+
+      .card-content {
+        padding: 12px;
+
+        .info-row {
+          .label {
+            min-width: 60px;
+            font-size: 13px;
+          }
+
+          .value {
+            font-size: 13px;
+          }
+        }
+      }
+    }
+  }
 }

@@ -122,32 +122,148 @@ const PerpetualCalendar_Complex = memo<any>((props: any) => {
     }
   };
   return (
-    <div className="perpetual-calendar-calendar">
-      <p>动物: {content.getAnimal}</p>
-      <p>八字: {content.getBaZi?.join(' ')}</p>
-      <p>八字纳音: {content.getBaZiNaYin?.join(' ')}</p>
-      <p>八字十神天干: {content.getBaZiShiShenGan?.join(' ')}</p>
-      <p>八字十神地支: {content.getBaZiShiShenZhi?.join(' ')}</p>
-      <p>八字十神年柱: {content.getBaZiShiShenYearZhi?.join(' ')}</p>
-      <p>八字十神月柱: {content.getBaZiShiShenMonthZhi?.join(' ')}</p>
-      <p>八字十神日柱: {content.getBaZiShiShenDayZhi?.join(' ')}</p>
-      <p>八字十神时柱: {content.getBaZiShiShenTimeZhi?.join(' ')}</p>
-      <p>八字五行: {content.getBaZiWuXing?.join(' ')}</p>
-      <p>
-        冲: {content.getChong}
-        {content.getChongDesc}
-      </p>
-      <p>宜：{content.getDayYi?.join('、')}</p>
-      <p>忌：{content.getDayJi?.join('、')}</p>
-      <p>吉神：{content.getDayJiShen?.join('、')}</p>
-      <p>凶煞：{content.getDayXiongSha?.join('、')}</p>
-      <p>
-        彭祖百忌：{content.getPengZuGan} {content.getPengZuZhi}
-      </p>
-      <p>修颂：{content.getXiuSong}</p>
-      <p>
-        {latLon.lat} {latLon.lon}
-      </p>
+    <div className="perpetual-calendar-complex">
+      {/* 基本信息卡片 */}
+      <div className="info-card basic-info">
+        <div className="card-header">
+          <span className="icon">🐾</span>
+          <h3>生肖与八字</h3>
+        </div>
+        <div className="card-content">
+          <div className="info-row">
+            <span className="label">生肖：</span>
+            <span className="value animal">{content.getAnimal}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">八字：</span>
+            <span className="value bazi">{content.getBaZi?.join(' ')}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">纳音：</span>
+            <span className="value">{content.getBaZiNaYin?.join(' ')}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">五行：</span>
+            <span className="value wuxing">{content.getBaZiWuXing?.join(' ')}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 宜忌卡片 */}
+      <div className="info-card yiji-card">
+        <div className="card-header">
+          <span className="icon">✨</span>
+          <h3>今日宜忌</h3>
+        </div>
+        <div className="card-content">
+          <div className="info-section yi">
+            <div className="section-title">
+              <span className="badge good">宜</span>
+            </div>
+            <p className="section-content">{content.getDayYi?.join('、') || '无'}</p>
+          </div>
+          <div className="info-section ji">
+            <div className="section-title">
+              <span className="badge bad">忌</span>
+            </div>
+            <p className="section-content">{content.getDayJi?.join('、') || '无'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 神煞卡片 */}
+      <div className="info-card shensha-card">
+        <div className="card-header">
+          <span className="icon">🌟</span>
+          <h3>吉神凶煞</h3>
+        </div>
+        <div className="card-content">
+          <div className="info-section">
+            <div className="section-title">
+              <span className="badge good">吉神</span>
+            </div>
+            <p className="section-content">{content.getDayJiShen?.join('、') || '无'}</p>
+          </div>
+          <div className="info-section">
+            <div className="section-title">
+              <span className="badge bad">凶煞</span>
+            </div>
+            <p className="section-content">{content.getDayXiongSha?.join('、') || '无'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 冲煞与彭祖百忌 */}
+      <div className="info-card chongsha-card">
+        <div className="card-header">
+          <span className="icon">⚡</span>
+          <h3>冲煞与禁忌</h3>
+        </div>
+        <div className="card-content">
+          <div className="info-row">
+            <span className="label">冲：</span>
+            <span className="value">{content.getChong} {content.getChongDesc}</span>
+          </div>
+          <div className="info-row pengzu">
+            <span className="label">彭祖百忌：</span>
+            <span className="value">{content.getPengZuGan} {content.getPengZuZhi}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 十神信息（可折叠） */}
+      <details className="info-card collapsible">
+        <summary className="card-header">
+          <span className="icon">🔮</span>
+          <h3>十神详解</h3>
+        </summary>
+        <div className="card-content">
+          <div className="info-row">
+            <span className="label">天干：</span>
+            <span className="value">{content.getBaZiShiShenGan?.join(' ')}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">地支：</span>
+            <span className="value">{content.getBaZiShiShenZhi?.join(' ')}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">年柱：</span>
+            <span className="value">{content.getBaZiShiShenYearZhi?.join(' ')}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">月柱：</span>
+            <span className="value">{content.getBaZiShiShenMonthZhi?.join(' ')}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">日柱：</span>
+            <span className="value">{content.getBaZiShiShenDayZhi?.join(' ')}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">时柱：</span>
+            <span className="value">{content.getBaZiShiShenTimeZhi?.join(' ')}</span>
+          </div>
+        </div>
+      </details>
+
+      {/* 其他信息 */}
+      <div className="info-card other-info">
+        <div className="card-header">
+          <span className="icon">📿</span>
+          <h3>其他信息</h3>
+        </div>
+        <div className="card-content">
+          <div className="info-row">
+            <span className="label">二十八宿：</span>
+            <span className="value">{content.getXiuSong}</span>
+          </div>
+          {latLon.lat && latLon.lon && (
+            <div className="info-row location">
+              <span className="label">📍 位置：</span>
+              <span className="value">{latLon.lat.toFixed(4)}°, {latLon.lon.toFixed(4)}°</span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 });

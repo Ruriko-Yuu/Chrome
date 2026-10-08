@@ -20,6 +20,9 @@
     font-size: 12px;
     color: #eee;
   }
+  .gap-10 {
+    gap: 10px;
+  }
 }
 
 .switch {
@@ -76,4 +79,14 @@
 
 .switch.on::before {
   left: 22px;
+}
+.app-body {
+  .developer-area {
+    border-top: 1px solid #e3e3e3;
+    margin-top: 5px;
+    padding: 5px 0 0;
+    .domain-line {
+      padding: 5px 0;
+    }
+  }
 }

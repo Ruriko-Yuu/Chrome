@@ -7,47 +7,108 @@
   justify-content: center;
   width: 100vw;
   height: 100vh;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.23);
-  z-index: 1;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
   .content {
     position: relative;
     overflow: hidden;
     width: 0;
     height: 0;
-    background-color: #fff;
-    border-radius: 10px;
-    transition: all 0.46s;
+    background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition: all 0.46s cubic-bezier(0.4, 0, 0.2, 1);
 
     .close {
       position: absolute;
       z-index: 9999;
-      top: 8px;
-      right: 8px;
-      line-height: 10px;
-      color: #000;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      color: #666;
+      font-size: 18px;
       cursor: pointer;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #fff;
+        color: #e74c3c;
+        transform: rotate(90deg) scale(1.1);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+      }
+
+      &:active {
+        transform: rotate(90deg) scale(0.95);
+      }
     }
   }
 
   .content.over {
-    width: 100%;
-    height: 100%;
+    width: 90%;
+    max-width: 1200px;
+    height: 85vh;
+    min-height: 600px;
   }
+
   .left--right {
     display: flex;
-    padding-top: 26px;
+    padding-top: 50px;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    .left,.right {
+    gap: 20px;
+
+    .left {
       flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .right {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
     }
   }
+
   @media screen and (max-width: 980px) {
+    padding: 12px;
+
+    .content.over {
+      width: 95%;
+      height: 90vh;
+    }
+
     .left--right {
       flex-direction: column;
+      padding-top: 50px;
+      gap: 16px;
+
+      .left,
+      .right {
+        flex: 1;
+      }
     }
   }
 }
