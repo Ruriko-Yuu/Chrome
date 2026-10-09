@@ -10,6 +10,7 @@ const workflow: any = new AudioTips();
 let doc: any = document;
 const Newtab = () => {
   useEffect(() => {
+    localStorage.setItem('speechInteraction', 'true');
     document.addEventListener(
       visibilityCge,
       () => {

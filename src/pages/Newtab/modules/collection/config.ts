@@ -20,13 +20,13 @@ export const defaultCollectionList = [
     value: 'Keyboard',
     href: '',
   },
-  // {
-  //   type: 'function',
-  //   icon: '../../../../../public/media/image/icon/z23_2.png',
-  //   title: 'Azurlane',
-  //   value: 'StatisticsSpace',
-  //   href: '',
-  // },
+  {
+    type: 'function',
+    icon: '../../../../../public/media/image/icon/z23_2.png',
+    title: 'Azurlane',
+    value: 'StatisticsSpace',
+    href: '',
+  },
   {
     type: 'link',
     icon: 'https://fgo.wiki/favicon.ico',

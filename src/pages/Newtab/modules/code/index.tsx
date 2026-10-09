@@ -1,26 +1,33 @@
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { useEffect, useState } from 'react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const MyCodeEditor = (props: any) => {
-  const [code, setCode] = useState(``);
+  const [code, setCode] = useState(props.code ?? '');
+  const focused = useRef(false);
+  // 外部配置变化（如右侧面板修改）实时同步到编辑器，编辑中不打断输入
   useEffect(() => {
-    setCode(props.code);
-  }, [props]);
+    if (!focused.current) {
+      setCode(props.code);
+    }
+  }, [props.code]);
   return (
     <CodeMirror
       value={code}
-      height="200px"
-      extensions={[json()]} // 这里可以尝试替换为 Groovy 支持
+      height={props.height ?? '200px'}
+      extensions={[json()]}
       theme={oneDark}
-      onChange={(value, viewUpdate) => {
-        console.log(value, viewUpdate);
-        setCode(value);
+      onFocus={() => {
+        focused.current = true;
       }}
       onBlur={() => {
-        props.codeChange(code);
+        focused.current = false;
+        props.codeChange?.(code);
+      }}
+      onChange={(value) => {
+        setCode(value);
+        props.codeChange?.(value);
       }}
     />
   );

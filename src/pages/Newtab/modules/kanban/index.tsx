@@ -6,7 +6,7 @@ const Kanban = memo(() => {
   const appRef = useRef<PIXI.Application | null>(null);
 
   const init = async () => {
-    console.log('[Kanban] init 开始');
+    console.groupCollapsed('[Kanban] init 开始');
 
     // 1. 先安装 unsafe-eval 补丁
     try {
@@ -109,6 +109,7 @@ const Kanban = memo(() => {
     app.render();
     console.log('[Kanban] 手动渲染一帧完成');
     console.log('[Kanban] app.ticker.started:', app.ticker.started);
+    console.groupEnd();
   };
 
   useEffect(() => {

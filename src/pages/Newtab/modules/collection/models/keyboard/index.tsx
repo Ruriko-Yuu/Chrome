@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import dayjs from 'dayjs';
 import './index.scss';
 import EchartsPreview from './apmChart';
+/** 键盘检测 */
 const KeyboardSpace = memo<any>((props: any) => {
   const [state, setState] = useState({ loadOver: true });
   const [keysState, setKeysState] = useState<any>({});
@@ -37,23 +38,24 @@ const KeyboardSpace = memo<any>((props: any) => {
       ) {
         const keyCurrent = [
           ...keyHistoryRef.current,
-          { code: event.code, time: new Date().getTime(), type: 'keyDown' },
+          { code: event.code || event.key, time: new Date().getTime(), type: 'keyDown' },
         ];
         setKeyHistory(keyCurrent);
         keyHistoryRef.current = keyCurrent;
       }
       const currentState = { ...keysStateRef.current };
-      if (currentState[event.code]) return; // 避免重复触发
-      currentState[event.code] = true;
+      if (currentState[event.code || event.key]) return; // 避免重复触发
+      currentState[event.code || event.key] = true;
       setKeysState(currentState);
       keysStateRef.current = currentState;
       console.log(currentState);
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
+      console.log(event)
       const keyCurrent = [
         ...keyHistoryRef.current,
-        { code: event.code, time: new Date().getTime(), type: 'keyUp' },
+        { code: event.code || event.key, time: new Date().getTime(), type: 'keyUp' },
       ];
       setKeyHistory(keyCurrent);
       keyHistoryRef.current = keyCurrent;
@@ -109,9 +111,8 @@ const KeyboardSpace = memo<any>((props: any) => {
     };
     return (
       <div
-        className={`key${keysState[config.key] === false ? ' pressed' : ''}${
-          keysState[config.key] === true ? ' active' : ''
-        }`}
+        className={`key${keysState[config.key] === false ? ' pressed' : ''}${keysState[config.key] === true ? ' active' : ''
+          }`}
         style={{ width: 50 * config.width + 'px', height: config.height }}
       >
         {config.text instanceof Array

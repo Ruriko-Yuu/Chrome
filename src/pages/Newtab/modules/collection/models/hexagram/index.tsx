@@ -1,6 +1,7 @@
 import React, { memo, useState, useEffect } from 'react';
 import { GUA_OBJ, guaObjKeys } from './k';
 import './index.scss';
+/** 六爻 */
 const HexagramSpace = memo<any>((props: any) => {
   const [state, setState] = useState({ loadOver: true });
   const [coinList, setCoinList] = useState<number[]>([]);
